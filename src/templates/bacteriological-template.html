@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Bacteriological Analysis Report</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            font-size: 12px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .approval-no {
+            font-size: 14px;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+
+        .report-title {
+            font-size: 16px;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+        }
+
+        .unified-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .unified-table td,
+        .unified-table th {
+            border: 1px solid #000;
+            padding: 5px;
+            vertical-align: top;
+            text-align: left;
+        }
+
+        .left-column {
+            width: 50%;
+            font-weight: bold;
+        }
+
+        .right-column {
+            width: 50%;
+            font-weight: bold;
+        }
+
+        .method-section {
+            font-weight: bold;
+            padding: 10px;
+        }
+
+        .unified-table th {
+            font-weight: bold;
+            background-color: #f0f0f0;
+            font-size: 12px;
+            padding: 10px 8px;
+        }
+
+        .unified-table td {
+            font-size: 11px;
+            vertical-align: middle;
+            text-align: left;
+        }
+
+        .address-text {
+            font-style: italic;
+            font-weight: normal;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <div class="approval-no">APPROVAL NO: {{approvalNo}}</div>
+        <div class="report-title">IN-HOUSE BACTERIOLOGICAL ANALYSIS REPORT</div>
+    </div>
+    
+    {{#each reports}}
+    <table class="unified-table">
+        <tr>
+            <td colspan="5">
+                <div><strong>PROCESSOR :</strong> {{processorName}}</div>
+                <div><strong>EXPORTER :</strong> {{exporterName}}</div>
+            </td>
+            <td colspan="5">
+                <div><strong>SPECIES :</strong> {{species}}</div>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="5">
+                <div><strong>BUYER :</strong> {{buyerName}}</div>
+                <div class="address-text">{{buyerAddress}}</div>
+                <div><strong>PO NO :</strong> {{poNumber}}</div>
+            </td>
+            <td colspan="5">
+                <div><strong>TOTAL NO OF MC/S :</strong> {{totalMCs}}</div>
+                <div><strong>GRADE :</strong> {{grade}}</div>
+                <div><strong>PRODUCTION CODE :</strong> {{productionCode}}</div>
+                <div><strong>TRACEABILITY :</strong> {{traceability}}</div>
+            </td>
+        </tr>
+        <tr>
+            <td class="left-column" colspan='5'>
+                <div><strong>VARIETY :</strong> {{variety}}</div>
+            </td>
+            <td class="right-column" colspan='5'>
+                <div><strong>TYPE OF PACKING :</strong> {{packingType}}</div>
+                <div><strong>TYPE OF SAMPLING :</strong> {{samplingType}}</div>
+            </td>
+        </tr>
+
+        <!-- Method of Test Section -->
+        <tr>
+            <td colspan="10" class="method-section">
+                METHOD OF TEST : AS FOR BAM-BACTERIOLOGICAL ANALYTICAL MANUAL
+            </td>
+        </tr>
+
+        <!-- Table Headers -->
+        <tr>
+            <th style="width: 10%;">Code</th>
+            <th style="width: 10%;">Date of Analysis</th>
+            <th style="width: 10%;">Date of Completion</th>
+            <th style="width: 10%;">Total plate count/gm at 37°C</th>
+            <th style="width: 10%;">E. coli C.F.U/gm</th>
+            <th style="width: 10%;">S. aureus C.F.U/gm</th>
+            <th style="width: 10%;">Salmonella / 25 gm</th>
+            <th style="width: 10%;">Vibrio cholera / 25 gm</th>
+            <th style="width: 10%;">Vibrio Parahaemolyticus / 25 gm</th>
+            <th style="width: 10%;">Listeria monocytogenes 25/GM</th>
+        </tr>
+
+        <!-- Data Rows -->
+        {{#each analysisResults}}
+        <tr>
+            <td style="width: 10%;"><strong>{{code}}</strong></td>
+            <td style="width: 10%;"><strong>{{analysisDate}}</strong></td>
+            <td style="width: 10%;"><strong>{{completionDate}}</strong></td>
+            <td style="width: 10%;"><strong>{{totalPlateCount}} CFU/GM</strong></td>
+            <td style="width: 10%;"><strong>{{eColi}}</strong></td>
+            <td style="width: 10%;"><strong>{{sAureus}}</strong></td>
+            <td style="width: 10%;"><strong>{{salmonella}}</strong></td>
+            <td style="width: 10%;"><strong>{{vibrioCholera}}</strong></td>
+            <td style="width: 10%;"><strong>{{vibrioParahaemolyticus}}</strong></td>
+            <td style="width: 10%;"><strong>{{listeriaMonocytogenes}}</strong></td>
+        </tr>
+        {{/each}}
+    </table>
+    
+    {{#unless @last}}
+    <div style="margin: 50px 0;"></div>
+    {{/unless}}
+    {{/each}}
+</body>
+
+</html>
