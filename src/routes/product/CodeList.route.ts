@@ -5,6 +5,7 @@ export const CodeListRoute = express.Router();
 
 CodeListRoute.get('/', CodeListController.findAll);
 CodeListRoute.get('/:id', CodeListController.find);
+CodeListRoute.get('/pi/:PIId', CodeListController.findByPIId);
 CodeListRoute.post('/', CodeListController.create);
 CodeListRoute.put('/', CodeListController.update);
 CodeListRoute.delete('/:id', CodeListController.remove);

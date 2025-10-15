@@ -97,6 +97,7 @@ export const create = async (req: Request, res: Response): Promise<void> => {
                     ItemId,
                 });
             }));
+
             const results = await getItem(ItemId);
             res.status(200).send(results);
         }
@@ -141,7 +142,6 @@ export const remove = async (req: Request, res: Response): Promise<void> => {
         res.status(500).send(e);
     }
 };
-
 
 const getItem = async (ItemId: any) => {
     const query = `
