@@ -8,3 +8,4 @@ BarRoute.get('/:id', BarController.find);
 BarRoute.post('/', BarController.create);
 BarRoute.put('/', BarController.update);
 BarRoute.delete('/:id', BarController.remove);
+BarRoute.delete('/item/:id', BarController.removeItem);

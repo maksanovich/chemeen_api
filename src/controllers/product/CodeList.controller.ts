@@ -107,8 +107,7 @@ export const create = async (req: Request, res: Response): Promise<void> => {
                     PIId,
                 });
             }));
-            const results = await getItem(PIId);
-            res.status(200).send(results);
+            res.status(200).send({ message: 'Product code created' });
         }
 
     } catch (e) {
@@ -174,6 +173,24 @@ export const remove = async (req: Request, res: Response): Promise<void> => {
     }
 };
 
+export const findByPIId = async (req: Request, res: Response): Promise<void> => {
+    const { PIId } = req.params;
+    
+    try {
+        if (!PIId) {
+            res.status(400).send({ error: 'PIId parameter is required' });
+            return;
+        }
+
+        const results = await getItem(PIId);
+        const groupedResults = groupCodeListByItemId(results);
+        res.status(200).send(groupedResults);
+    } catch (e) {
+        console.log(JSON.stringify(e), 'error');
+        res.status(500).send(e);
+    }
+};
+
 
 const getItem = async (PIId: any) => {
     const query = `
@@ -184,7 +201,9 @@ const getItem = async (PIId: any) => {
             c.companyName as farmName,
             cl.PRSGId,
             pg.PRSGDesc,
-            cl.value
+            cl.value,
+            prs.PRSName,
+            prst.PRSTName
         FROM 
             tbl_code_list as cl 
         LEFT JOIN 
@@ -193,6 +212,15 @@ const getItem = async (PIId: any) => {
         LEFT JOIN 
             tbl_prsg as pg 
             ON cl.PRSGId = pg.PRSGId
+        LEFT JOIN 
+            tbl_items as item
+            ON cl.ItemId = item.ItemId
+        LEFT JOIN 
+            tbl_prs as prs
+            ON item.PRSId = prs.PRSId
+        LEFT JOIN 
+            tbl_prst as prst
+            ON item.PRSTId = prst.PRSTId
         WHERE cl.PIId = :PIId
         ORDER BY 
             cl.createdAt;  
@@ -204,4 +232,35 @@ const getItem = async (PIId: any) => {
     });
 
     return results;
+}
+
+const groupCodeListByItemId = (codeList: any[]) => {
+    const grouped: { [key: string]: any } = {};
+
+    codeList.forEach((item) => {
+        const key = `${item.ItemId}_${item.code}_${item.farmId}`;
+
+        if (!grouped[key]) {
+            grouped[key] = {
+                ItemId: item.ItemId,
+                productCode: item.ItemId, // Use ItemId as productCode to match ThemedPicker value
+                productName: `${item.PRSName || ''} ${item.PRSTName || ''}`.trim(), // Keep the name for display
+                code: item.code,
+                farmId: item.farmId,
+                farmName: item.farmName,
+                total: 0,
+                grades: []
+            };
+        }
+
+        grouped[key].grades.push({
+            PRSGId: item.PRSGId,
+            PRSGDesc: item.PRSGDesc,
+            value: item.value
+        });
+
+        grouped[key].total += item.value;
+    });
+
+    return Object.values(grouped);
 }
