@@ -111,17 +111,17 @@ export const remove = async (req: Request, res: Response): Promise<void> => {
 };
 
 
-const getItem = async (PIId: any) => {
+const getItem = async (elisaId: any) => {
     const query = `
         SELECT
         ed.*, test.testDesc as testName
         FROM tbl_elisa_detail as ed
         LEft join tbl_test as test 
         on test.testId = ed.testId
-        WHERE PIId = :PIId
+        WHERE elisaId = :elisaId
     `;
     const results = await sequelize.query(query, {
-        replacements: { PIId },
+        replacements: { elisaId },
         type: QueryTypes.SELECT
     });
 

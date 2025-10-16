@@ -59,27 +59,6 @@ export const create = async (req: Request, res: Response): Promise<void> => {
     }
 };
 
-// export const update = async (req: Request, res: Response): Promise<void> => {
-//     try {
-//         const { PIId, data } = req.body;
-//         if (!PIId || !Array.isArray(data)) {
-//             res.status(400).send({ error: 'Invalid input data' });
-//         } else {
-
-//             await BARModel.destroy({ where: { PIId: PIId } });
-//             await Promise.all(data.map(async (detail) => {
-//                 return await BARModel.create({
-//                     ...detail,
-//                     PIId,
-//                 });
-//             }));
-//             const results = await getItem(PIId);
-//             res.status(200).send(results);
-//         }
-//     } catch (e) {
-//         res.status(500).send(e);
-//     }
-// };
 export const update = async (req: Request, res: Response): Promise<void> => {
     try {
         const { PIId, data } = req.body;
@@ -120,9 +99,27 @@ export const update = async (req: Request, res: Response): Promise<void> => {
 export const remove = async (req: Request, res: Response): Promise<void> => {
     const id: string = req.params.id;
     try {
+        // Delete by PIId (all items for a PI)
         const deletedCount = await BARModel.destroy({ where: { PIId: id } });
         if (deletedCount) {
             res.sendStatus(204);
+        } else {
+            res.status(404).send({ error: 'No BAR items found for this PI' });
+        }
+    } catch (e) {
+        res.status(500).send(e);
+    }
+};
+
+export const removeItem = async (req: Request, res: Response): Promise<void> => {
+    const id: string = req.params.id;
+    try {
+        // Delete by BARId (individual item)
+        const deletedCount = await BARModel.destroy({ where: { BARId: id } });
+        if (deletedCount) {
+            res.sendStatus(204);
+        } else {
+            res.status(404).send({ error: 'BAR item not found' });
         }
     } catch (e) {
         res.status(500).send(e);

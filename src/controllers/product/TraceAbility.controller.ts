@@ -28,6 +28,10 @@ export const findAll = async (req: Request, res: Response): Promise<void> => {
                     });
                     res.status(200).send(results);
                 } break;
+                case 'formatted': {
+                    const results = await getFormattedTraceAbilityData(PIId as string);
+                    res.status(200).send(results);
+                } break;
                 default: {
                     const items = await TraceAbilityModel.findAll({ order: [['createdAt', 'DESC']] });
                     const result = convertId(items, 'traceAbilityId');
@@ -147,4 +151,84 @@ const getItem = async (PIId: any) => {
     });
 
     return results;
+}
+
+export const getFormattedTraceAbilityData = async (PIId: string) => {
+    try {
+        // Get code list data with product information
+        const codeListQuery = `
+            SELECT 
+                cl.ItemId,
+                cl.code,
+                SUM(cl.value) as totalCartons,
+                c.companyName as farmName,
+                prs.PRSName,
+                prst.PRSTName
+            FROM tbl_code_list AS cl 
+            LEFT JOIN tbl_companies AS c ON c.companyId = cl.farmId
+            LEFT JOIN tbl_items AS item ON item.ItemId = cl.ItemId
+            LEFT JOIN tbl_prs AS prs ON prs.PRSId = item.PRSId
+            LEFT JOIN tbl_prst AS prst ON prst.PRSTId = item.PRSTId
+            WHERE cl.PIId = :PIId 
+            GROUP BY cl.ItemId, cl.code, c.companyName, prs.PRSName, prst.PRSTName
+        `;
+
+        const codeListData = await sequelize.query(codeListQuery, {
+            replacements: { PIId },
+            type: QueryTypes.SELECT
+        });
+
+        // Get existing traceability data
+        const traceAbilityQuery = `
+            SELECT 
+                ItemId,
+                productDate,
+                rawMaterialQty,
+                headlessQty,
+                usedCase,
+                beforeDate
+            FROM tbl_trace_ability 
+            WHERE PIId = :PIId
+        `;
+
+        const traceAbilityData = await sequelize.query(traceAbilityQuery, {
+            replacements: { PIId },
+            type: QueryTypes.SELECT
+        });
+
+        // Create a map of existing traceability data by ItemId
+        const traceAbilityMap = new Map(
+            traceAbilityData.map((item: any) => [item.ItemId, item])
+        );
+
+        // Format the data combining code list and traceability data
+        const formattedData = codeListData.map((item: any) => {
+            const existing = traceAbilityMap.get(item.ItemId);
+            const total = parseFloat(item.totalCartons) || 0;
+            const usedCase = parseFloat(existing?.usedCase || "0");
+            const balance = total - usedCase;
+
+            return {
+                ItemId: item.ItemId,
+                code: item.code,
+                farmName: item.farmName,
+                totalCartons: item.totalCartons,
+                PRSName: item.PRSName,
+                PRSTName: item.PRSTName,
+                productCode: `${item.PRSName} ${item.PRSTName}`,
+                total: total.toString(),
+                productDate: existing?.productDate || "",
+                rawMaterialQty: existing?.rawMaterialQty || "0",
+                headlessQty: existing?.headlessQty || "0",
+                usedCase: existing?.usedCase || "0",
+                ballanceCase: balance.toString(),
+                beforeDate: existing?.beforeDate || "",
+            };
+        });
+
+        return formattedData;
+    } catch (error) {
+        console.error('Error in getFormattedTraceAbilityData:', error);
+        throw error;
+    }
 }

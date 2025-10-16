@@ -84,15 +84,20 @@ export const update = async (req: Request, res: Response): Promise<void> => {
 export const remove = async (req: Request, res: Response): Promise<void> => {
     const id: string = req.params.id;
     try {
+        // First delete ELISA details (child records)
+        await ElisaDetailModel.destroy({ where: { elisaId: id } });
+        
+        // Then delete ELISA record (parent record)
         const deletedCount = await ElisaModel.destroy({ where: { elisaId: id } });
-        const response = await ElisaDetailModel.destroy({ where: { elisaId: id } });
+        
         if (deletedCount) {
-            res.sendStatus(204);
+            res.status(200).json({ message: 'ELISA item and details deleted successfully' });
         } else {
-            res.status(404).send("Item not found");
+            res.status(404).json({ message: 'Item not found' });
         }
     } catch (e) {
-        res.status(500).send(e);
+        console.error('Delete error:', e);
+        res.status(500).json({ message: 'Internal server error', error: e });
     }
 };
 
