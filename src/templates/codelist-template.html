@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>K.V. Marine Exports - Code List</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: center;
+        }
+
+        th,
+        td {
+            border: 1px solid #000;
+            padding: 5px;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        .header {
+            color: red;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .brand {
+            color: red;
+            font-weight: bold;
+            font-size: 12px;
+        }
+
+        .total {
+            color: red;
+            font-weight: bold;
+            width: 20%;
+            font-size: 12px;
+        }
+
+        table td {
+            height: 20px;
+        }
+
+        .main-td {
+            width: 30px;
+            font-size: 12px;
+        }
+
+        .productName {
+            font-weight: bold;
+            text-align: center;
+            font-size: 12px;
+        }
+
+        .productDetail {
+            text-align: center;
+            font-size: 12px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body style="margin: 30px">
+    <div class="header">
+        <h2 style="margin-top: 30px; margin-bottom: 0px; font-size: 13px;">CODE LIST</h2>
+        <h1 style="margin-top: 0px; margin-bottom: 0px; font-size: 18px;">{{companyName}}</h1>
+        <p style="font-size: 12px; margin: 0">{{companyAddress}}</p>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th class="brand" style="width: 20%;">PARTICULARS</th>
+                <th class="brand" colspan="10">CONSIGNEE: {{consigneeName}}</th>
+                <th class="total">TOTAL NO. OF M/C'S</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#each products}}
+            <tr>
+                <td rowspan="2" class="productName">{{PRSName}} - {{PRSTName}}</td>
+                <td class="main-td"></td>
+                <td class="main-td"></td>
+                <td class="main-td"></td>
+                <td class="main-td"></td>
+                <td class="main-td"></td>
+                <td class="main-td"></td>
+                <td class="main-td"></td>
+                <td class="main-td"></td>
+                <td class="main-td"></td>
+                <td class="main-td"></td>
+                <td class="main-td"></td>
+            </tr>
+            <tr>
+                <td class="main-td"></td>
+                <td class="main-td"></td>
+                <td class="main-td"></td>
+                {{#each codeValues}}
+                <td class="main-td" style="color:red;">{{this}}</td>
+                {{/each}}
+                {{#times (subtract 8 codeValues.length)}}
+                <td class="main-td" style="color:red;"></td>
+                {{/times}}
+            </tr>
+            <tr>
+                <td class="productDetail">{{PRSPWSStyle}}</td>
+                <td class="main-td"></td>
+                <td class="main-td"></td>
+                <td class="main-td"></td>
+                {{#each codeValues}}
+                <td class="main-td">{{../pieceWeight}}</td>
+                {{/each}}
+                {{#times (subtract 8 codeValues.length)}}
+                <td class="main-td"></td>
+                {{/times}}
+            </tr>
+            <tr>
+                <td class="productDetail">{{code}}</td>
+                <td class="main-td"></td>
+                <td class="main-td"></td>
+                <td class="main-td"></td>
+                {{#each values}}
+                <td class="main-td">{{this}}</td>
+                {{/each}}
+                {{#times (subtract 7 values.length)}}
+                <td class="main-td"></td>
+                {{/times}}
+                <td class="total">{{totalValue}}</td>
+            </tr>
+
+            <tr style="height: 2px;">
+                <td colspan="12" style="height: 2px; padding: 0; margin: 0;"></tr>
+            </tr>
+            {{/each}}
+
+
+            <tr>
+                <td></td>
+                <td class="main-td"></td>
+                <td class="main-td"></td>
+                <td class="main-td"></td>
+                <td class="main-td"></td>
+                <td class="main-td"></td>
+                <td class="main-td"></td>
+                <td class="main-td"></td>
+                <td class="main-td"></td>
+                <td class="main-td"></td>
+                <td class="main-td"></td>
+                <td></td>
+            </tr>
+
+            <tr>
+                <td class="total">Grand Total</td>
+                <td class="main-td"></td>
+                <td class="main-td"></td>
+                <td class="main-td"></td>
+                <td class="main-td"></td>
+                <td class="main-td"></td>
+                <td class="main-td"></td>
+                <td class="main-td"></td>
+                <td class="main-td"></td>
+                <td class="main-td"></td>
+                <td class="main-td"></td>
+                <td class="total">{{grandTotal}}</td>
+            </tr>
+
+            <tr>
+                <td></td>
+                <td class="main-td"></td>
+                <td class="main-td"></td>
+                <td class="main-td"></td>
+                <td class="main-td"></td>
+                <td class="main-td"></td>
+                <td class="main-td"></td>
+                <td class="main-td"></td>
+                <td class="main-td"></td>
+                <td class="main-td"></td>
+                <td class="main-td"></td>
+                <td></td>
+            </tr>
+
+            <tr>
+                <td></td>
+                <td colspan="5">
+                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: red; font-weight: bold;">
+                        <div>INVOICE NO.: {{invoiceNumber}}</div>
+                        <div>DT. {{invoiceDate}}</div>
+                    </div>
+                </td>
+                <td colspan="5">
+                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: red; font-weight: bold;">
+                        <div>Q CERTIFICATE NO: {{certificateNumber}}</div>
+                        <div>DT. {{certificateDate}}</div>
+                    </div>
+                </td>
+                <td></td>
+            </tr>
+
+            <tr>
+                <td colspan="12" style="height: 80px;">
+                    <div class="total" style="width: 100%; font-size: 12px;">
+                        This is to declare that the above products were Aquacultured and Sea material and the above codes were tested for both organoleptic and bacteriological factors and found to
+be export worthy. We have not treated the products with any food additives, ingredients, preservatives, colours, spice condiments or any other permitted food chemicals.
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="total" style="width: 100%; font-size: 12px; text-align: left; margin-top: 5px;">
+        Date: {{documentDate}}
+    </div>
+</body>
+
+</html>
+</html>
