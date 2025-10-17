@@ -17,6 +17,7 @@ export const findAll = async (req: Request, res: Response): Promise<void> => {
                     const query = `
                             SELECT 
                             pd.PRSGId, 
+                            pd.cartons,
                             (SELECT psg.PRSGDesc FROM tbl_prsg as psg WHERE psg.PRSGId = pd.PRSGId) as value
                             FROM 
                             tbl_item_details as pd 

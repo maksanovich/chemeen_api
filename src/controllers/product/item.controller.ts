@@ -138,16 +138,28 @@ export const remove = async (req: Request, res: Response): Promise<void> => {
 
         // Remove related records in associated tables
         console.log('Deleting related records...');
-        await Promise.all([
-            CodeListModel.destroy({ where: { ItemId: id } }),
-            BARModel.destroy({ where: { ItemId: id } }),
-            TraceAbilityModel.destroy({ where: { ItemId: id } }),
-            // Delete ELISA details first (child records) - only if we have ELISA IDs
-            ...(elisaIds.length > 0 ? [ElisaDetailModel.destroy({ where: { elisaId: { [Op.in]: elisaIds } } })] : []),
-            // Then delete ELISA records (parent records)
-            ElisaModel.destroy({ where: { ItemId: id } }),
-            ItemDetailModel.destroy({ where: { ItemId: id } }),
-        ]);
+        // Always delete ELISA details via subquery on elisaId linked to this ItemId
+        // This handles cases where elisaIds array is empty due to query issues or type coercion
+        await sequelize.transaction(async (t) => {
+            // Delete ELISA details first
+            await sequelize.query(
+                `DELETE FROM tbl_elisa_detail WHERE elisaId IN (
+                    SELECT elisaId FROM tbl_elisa WHERE ItemId = :ItemId
+                )`,
+                { replacements: { ItemId: id }, type: QueryTypes.RAW, transaction: t }
+            );
+
+            // Then delete ELISA records
+            await ElisaModel.destroy({ where: { ItemId: id }, transaction: t });
+
+            // Delete other related records
+            await Promise.all([
+                CodeListModel.destroy({ where: { ItemId: id }, transaction: t }),
+                BARModel.destroy({ where: { ItemId: id }, transaction: t }),
+                TraceAbilityModel.destroy({ where: { ItemId: id }, transaction: t }),
+                ItemDetailModel.destroy({ where: { ItemId: id }, transaction: t }),
+            ]);
+        });
 
         console.log('Related records deleted successfully');
 

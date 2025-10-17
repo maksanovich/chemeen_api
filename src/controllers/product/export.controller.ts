@@ -41,7 +41,8 @@ export const exportPIPDF = async (req: Request, res: Response): Promise<void> =>
         piData.totalCartons = totalCartons;
         piData.totalKgQty = totalKgQty.toFixed(2);
         piData.totalAmount = totalAmount.toFixed(2);
-
+        piData.totalGrossQty = (totalCartons * 17).toFixed(2);
+        
         piData.amountsWord = amount2word(totalAmount);
 
         if (!piData) {
@@ -336,6 +337,7 @@ const generatePIPDF = async (id: string): Promise<{ success: boolean; data?: Buf
         piData.totalCartons = totalCartons;
         piData.totalKgQty = totalKgQty.toFixed(2);
         piData.totalAmount = totalAmount.toFixed(2);
+        piData.totalGrossQty = (totalCartons * 17).toFixed(2);
         
         piData.amountsWord = amount2word(piData.totalAmount);
         

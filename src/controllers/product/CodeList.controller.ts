@@ -1,9 +1,11 @@
 import { Request, Response } from 'express';
-import { QueryTypes } from 'sequelize';
+import { QueryTypes, Op } from 'sequelize';
 
 import sequelize from '../../config/sequelize';
 import { convertId } from '../../common/utils';
 import { CodeListModel } from "../../models/product/codeList.model";
+import { TraceAbilityModel } from "../../models/product/traceAbility.model";
+import { BARModel } from "../../models/product/BAR.model";
 
 export const findAll = async (req: Request, res: Response): Promise<void> => {
     const { type, PIId } = req.query;
@@ -124,24 +126,46 @@ export const update = async (req: Request, res: Response): Promise<void> => {
             return;
         }
 
-        await Promise.all(
-            data.map(async (detail) => {
-                const { ItemId, PRSGId } = detail;
-
-                const existing = await CodeListModel.findOne({
-                    where: { PIId, ItemId, PRSGId },
-                });
-
-                if (existing) {
-                    await existing.update(detail);
-                } else {
-                    await CodeListModel.create({
-                        ...detail,
-                        PIId,
+        // Use a transaction for consistency
+        await sequelize.transaction(async (t) => {
+            // 1) Upsert each detail row
+            await Promise.all(
+                data.map(async (detail) => {
+                    const { ItemId, PRSGId } = detail;
+                    const existing = await CodeListModel.findOne({
+                        where: { PIId, ItemId, PRSGId },
+                        transaction: t,
                     });
-                }
-            })
-        );
+                    if (existing) {
+                        await existing.update(detail, { transaction: t });
+                    } else {
+                        await CodeListModel.create({ ...detail, PIId }, { transaction: t });
+                    }
+                })
+            );
+
+            // 2) After upsert, ensure dependent tables' codes match CodeList by PIId+ItemId
+            const rows: any[] = await sequelize.query(
+                `SELECT ItemId, MAX(code) as code FROM tbl_code_list WHERE PIId = :PIId GROUP BY ItemId`,
+                { replacements: { PIId }, type: QueryTypes.SELECT, transaction: t as any }
+            );
+
+            await Promise.all(rows.map(async (row: any) => {
+                const itemId = row.ItemId;
+                const newCode = row.code;
+                // Update only rows where code differs for this PIId+ItemId
+                await Promise.all([
+                    TraceAbilityModel.update(
+                        { code: newCode },
+                        { where: { PIId, ItemId: itemId, code: { [Op.ne]: newCode } }, transaction: t }
+                    ),
+                    BARModel.update(
+                        { code: newCode },
+                        { where: { PIId, ItemId: itemId, code: { [Op.ne]: newCode } }, transaction: t }
+                    )
+                ]);
+            }));
+        });
 
         const results = await getItem(PIId);
         res.status(200).send(results);

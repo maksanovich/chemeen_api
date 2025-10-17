@@ -24,7 +24,8 @@ export const find = async (req: Request, res: Response): Promise<void> => {
         if (results.length > 0) {
             res.status(200).send(results);
         } else {
-            res.status(200).send({});
+            // Return empty array for consistency with list endpoint
+            res.status(200).send([]);
         }
     } catch (e) {
         res.status(500).send(e);
