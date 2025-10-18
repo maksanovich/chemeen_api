@@ -1,0 +1,10 @@
+# Add these lines to your .gitignore file
+
+# Uploaded files
+uploads/
+!uploads/.gitkeep
+
+# Keep the directory structure but ignore uploaded files
+uploads/**/*
+!uploads/**/.gitkeep
+
