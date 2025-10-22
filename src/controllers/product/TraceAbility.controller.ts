@@ -69,37 +69,30 @@ export const create = async (req: Request, res: Response): Promise<void> => {
             return;
         }
 
-        // Validate that usedCase never exceeds total (balance >= 0)
+        // Validate required fields only (balance case is now user-controlled)
         const validationErrors: string[] = [];
         data.forEach((detail, index) => {
-            const total = parseFloat(detail.total) || 0;
-            const usedCase = parseFloat(detail.usedCase) || 0;
-            
-            if (usedCase > total) {
+            if (!detail.productDate || !detail.rawMaterialQty || !detail.headlessQty) {
                 validationErrors.push(
-                    `Entry ${index + 1} (Code: ${detail.code}): usedCase (${usedCase}) cannot exceed total (${total}). Balance would be negative.`
+                    `Entry ${index + 1} (Code: ${detail.code}): Missing required fields (Production Date, Raw Material Qty, Headless Qty)`
                 );
             }
         });
 
         if (validationErrors.length > 0) {
             res.status(400).send({ 
-                error: 'Validation failed: usedCase exceeds total',
+                error: 'Validation failed: Missing required fields',
                 details: validationErrors 
             });
             return;
         }
 
-        // Calculate and set balance for each entry
+        // Use user-provided balance case instead of calculating
         await Promise.all(data.map(async (detail) => {
-            const total = parseFloat(detail.total) || 0;
-            const usedCase = parseFloat(detail.usedCase) || 0;
-            const balance = total - usedCase;
-
             return await TraceAbilityModel.create({
                 ...detail,
                 PIId,
-                ballanceCase: balance.toString(),
+                ballanceCase: detail.ballanceCase || '0', // Use user input
             });
         }));
 
@@ -119,22 +112,19 @@ export const update = async (req: Request, res: Response): Promise<void> => {
             return;
         }
 
-        // Validate that usedCase never exceeds total (balance >= 0)
+        // Validate required fields only (balance case is now user-controlled)
         const validationErrors: string[] = [];
         data.forEach((detail, index) => {
-            const total = parseFloat(detail.total) || 0;
-            const usedCase = parseFloat(detail.usedCase) || 0;
-            
-            if (usedCase > total) {
+            if (!detail.productDate || !detail.rawMaterialQty || !detail.headlessQty) {
                 validationErrors.push(
-                    `Entry ${index + 1} (Code: ${detail.code}): usedCase (${usedCase}) cannot exceed total (${total}). Balance would be negative.`
+                    `Entry ${index + 1} (Code: ${detail.code}): Missing required fields (Production Date, Raw Material Qty, Headless Qty)`
                 );
             }
         });
 
         if (validationErrors.length > 0) {
             res.status(400).send({ 
-                error: 'Validation failed: usedCase exceeds total',
+                error: 'Validation failed: Missing required fields',
                 details: validationErrors 
             });
             return;
@@ -144,14 +134,10 @@ export const update = async (req: Request, res: Response): Promise<void> => {
         await TraceAbilityModel.destroy({ where: { PIId: PIId } });
         
         await Promise.all(data.map(async (detail) => {
-            const total = parseFloat(detail.total) || 0;
-            const usedCase = parseFloat(detail.usedCase) || 0;
-            const balance = total - usedCase;
-
             return await TraceAbilityModel.create({
                 ...detail,
                 PIId,
-                ballanceCase: balance.toString(),
+                ballanceCase: detail.ballanceCase || '0', // Use user input
             });
         }));
 
@@ -245,6 +231,7 @@ export const getFormattedTraceAbilityData = async (PIId: string) => {
                 rawMaterialQty,
                 headlessQty,
                 usedCase,
+                ballanceCase,
                 beforeDate
             FROM tbl_trace_ability 
             WHERE PIId = :PIId
@@ -265,7 +252,7 @@ export const getFormattedTraceAbilityData = async (PIId: string) => {
             const existing = traceAbilityMap.get(item.ItemId);
             const total = parseFloat(item.totalCartons) || 0;
             const usedCase = parseFloat(existing?.usedCase || "0");
-            const balance = total - usedCase;
+            const balanceCase = existing ? parseFloat(existing.ballanceCase || "0") : total; // Use actual balance from database
 
             return {
                 ItemId: item.ItemId,
@@ -280,7 +267,7 @@ export const getFormattedTraceAbilityData = async (PIId: string) => {
                 rawMaterialQty: existing?.rawMaterialQty || "0",
                 headlessQty: existing?.headlessQty || "0",
                 usedCase: existing?.usedCase || "0",
-                ballanceCase: balance.toString(),
+                ballanceCase: balanceCase.toString(), // Use actual balance or default to total
                 beforeDate: existing?.beforeDate || "",
             };
         });
