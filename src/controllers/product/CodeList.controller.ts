@@ -6,6 +6,7 @@ import { convertId } from '../../common/utils';
 import { CodeListModel } from "../../models/product/codeList.model";
 import { TraceAbilityModel } from "../../models/product/traceAbility.model";
 import { BARModel } from "../../models/product/BAR.model";
+import { ItemDetailModel } from "../../models/product/itemDetail.model";
 
 export const findAll = async (req: Request, res: Response): Promise<void> => {
     const { type, PIId } = req.query;
@@ -102,19 +103,105 @@ export const create = async (req: Request, res: Response): Promise<void> => {
         const { PIId, data } = req.body;
         if (!PIId || !Array.isArray(data)) {
             res.status(400).send({ error: 'Invalid input data' });
-        } else {
-            await Promise.all(data.map(async (detail) => {
-                return await CodeListModel.create({
-                    ...detail,
-                    PIId,
-                });
-            }));
-            res.status(200).send({ message: 'Product code created' });
+            return;
         }
 
+        // Use a transaction for consistency
+        await sequelize.transaction(async (t) => {
+            // Validate each detail before creating
+            await Promise.all(
+                data.map(async (detail) => {
+                    const { ItemId, PRSGId, value } = detail;
+                    
+                    // Validate the value before creating
+                    if (ItemId && PRSGId && value !== undefined) {
+                        await validateValueUpdate(ItemId, PRSGId, Number(value), null, t);
+                    }
+                    
+                    return await CodeListModel.create({
+                        ...detail,
+                        PIId,
+                    }, { transaction: t });
+                })
+            );
+        });
+
+        res.status(200).send({ message: 'Product code created' });
     } catch (e) {
         console.log(JSON.stringify(e), 'error');
-        res.status(500).send(e);
+        
+        // Check if it's a validation error and format it properly
+        if (e instanceof Error && e.message.includes('Cannot create code list entry')) {
+            res.status(400).send({ 
+                error: 'Validation Error',
+                details: e.message,
+                message: e.message
+            });
+        } else {
+            res.status(500).send({ 
+                error: 'Internal Server Error',
+                details: e instanceof Error ? e.message : 'An unexpected error occurred',
+                message: 'Failed to create code list item'
+            });
+        }
+    }
+};
+
+// Helper function to validate if the new value is within allowed limits
+const validateValueUpdate = async (ItemId: number, PRSGId: number, newValue: number, codeId: number | null, transaction: any) => {
+    try {
+        // Get the cartons value from tbl_item_details for the specific ItemId and PRSGId
+        const itemDetail = await ItemDetailModel.findOne({
+            where: { ItemId, PRSGId },
+            transaction
+        });
+
+        if (!itemDetail) {
+            throw new Error(`Item detail not found for ItemId: ${ItemId}, PRSGId: ${PRSGId}`);
+        }
+
+        const maxCartons = Number((itemDetail as any).cartons) || 0;
+        
+        // Get the grade description
+        const gradeQuery = `
+            SELECT PRSGDesc FROM tbl_prsg WHERE PRSGId = :PRSGId
+        `;
+        const gradeResult: any[] = await sequelize.query(gradeQuery, {
+            replacements: { PRSGId },
+            type: QueryTypes.SELECT,
+            transaction
+        });
+        const gradeDesc = gradeResult.length > 0 ? gradeResult[0].PRSGDesc : `Grade ${PRSGId}`;
+        
+        // Get all current code list entries for this ItemId and PRSGId
+        const currentEntries = await CodeListModel.findAll({
+            where: { ItemId, PRSGId },
+            transaction
+        });
+
+        // Calculate current total value for this ItemId and PRSGId
+        let currentTotal = currentEntries.reduce((sum, entry) => sum + (Number((entry as any).value) || 0), 0);
+        
+        // If we're updating an existing record, subtract its current value from the total
+        if (codeId) {
+            const existingEntry = currentEntries.find(entry => (entry as any).codeId === codeId);
+            if (existingEntry) {
+                currentTotal -= Number((existingEntry as any).value) || 0;
+            }
+        }
+        
+        // Add the new value to get the new total
+        const newTotal = currentTotal + newValue;
+        
+        if (newTotal > maxCartons) {
+            const operation = codeId ? 'update' : 'create';
+            throw new Error(`Cannot ${operation} code list entry. Total allocated quantity (${newTotal} cartons) exceeds customer requirement (${maxCartons} cartons) for grade "${gradeDesc}". Please reduce allocated quantities.`);
+        }
+
+        return true;
+    } catch (error) {
+        console.error('Validation error:', error);
+        throw error;
     }
 };
 
@@ -128,10 +215,15 @@ export const update = async (req: Request, res: Response): Promise<void> => {
 
         // Use a transaction for consistency
         await sequelize.transaction(async (t) => {
-            // 1) Update or create each detail row using codeId when available
+            // 1) Validate and update or create each detail row using codeId when available
             await Promise.all(
                 data.map(async (detail) => {
-                    const { codeId, ItemId, PRSGId } = detail;
+                    const { codeId, ItemId, PRSGId, value } = detail;
+                    
+                    // Validate the value update before proceeding
+                    if (ItemId && PRSGId && value !== undefined) {
+                        await validateValueUpdate(ItemId, PRSGId, Number(value), codeId, t);
+                    }
                     
                     if (codeId) {
                         // If codeId is provided, update by codeId for precise targeting
@@ -186,7 +278,22 @@ export const update = async (req: Request, res: Response): Promise<void> => {
         const results = await getItem(PIId);
         res.status(200).send(results);
     } catch (e) {
-        res.status(500).send(e);
+        console.log(JSON.stringify(e), 'error');
+        
+        // Check if it's a validation error and format it properly
+        if (e instanceof Error && e.message.includes('Cannot update code list entry')) {
+            res.status(400).send({ 
+                error: 'Validation Error',
+                details: e.message,
+                message: e.message
+            });
+        } else {
+            res.status(500).send({ 
+                error: 'Internal Server Error',
+                details: e instanceof Error ? e.message : 'An unexpected error occurred',
+                message: 'Failed to update code list item'
+            });
+        }
     }
 };
 
@@ -235,6 +342,68 @@ export const findByPIId = async (req: Request, res: Response): Promise<void> => 
         const results = await getItem(PIId);
         const groupedResults = groupCodeListByItemId(results);
         res.status(200).send(groupedResults);
+    } catch (e) {
+        console.log(JSON.stringify(e), 'error');
+        res.status(500).send(e);
+    }
+};
+
+export const checkCode = async (req: Request, res: Response): Promise<void> => {
+    const { PIId, code } = req.params;
+    const { excludeId } = req.query;
+    
+    try {
+        if (!PIId || !code) {
+            res.status(400).send({ error: 'PIId and code parameters are required' });
+            return;
+        }
+
+        // Build the where clause
+        const whereClause: any = {
+            PIId: PIId,
+            code: code.trim()
+        };
+
+        // If excludeId is provided, we need to exclude all codeIds that belong to the same codelist item
+        if (excludeId) {
+            // First, find the codelist item that contains the excludeId
+            const excludeItem = await CodeListModel.findOne({
+                where: { codeId: excludeId },
+                attributes: ['ItemId', 'code', 'farmId']
+            });
+
+            if (excludeItem) {
+                // Find all codeIds that belong to the same codelist item (same ItemId, code, farmId)
+                const sameCodeListItems = await CodeListModel.findAll({
+                    where: {
+                        ItemId: (excludeItem as any).ItemId,
+                        code: (excludeItem as any).code,
+                        farmId: (excludeItem as any).farmId
+                    },
+                    attributes: ['codeId']
+                });
+
+                // Exclude all these codeIds from the duplicate check
+                const excludeCodeIds = sameCodeListItems.map(item => (item as any).codeId);
+                whereClause.codeId = { [Op.notIn]: excludeCodeIds };
+                
+                // Also add the ItemId and farmId to the where clause to only check within the same item and farm
+                whereClause.ItemId = (excludeItem as any).ItemId;
+                whereClause.farmId = (excludeItem as any).farmId;
+            } else {
+                // Fallback: if excludeId doesn't exist, exclude just that specific codeId
+                whereClause.codeId = { [Op.ne]: excludeId };
+            }
+        }
+
+        const existingCode = await CodeListModel.findOne({
+            where: whereClause
+        });
+
+        res.status(200).send({ 
+            exists: !!existingCode,
+            message: existingCode ? 'Code already exists' : 'Code is available'
+        });
     } catch (e) {
         console.log(JSON.stringify(e), 'error');
         res.status(500).send(e);

@@ -101,6 +101,9 @@ export const update = async (req: Request, res: Response): Promise<void> => {
     const id: string = req.params.id;
     try {
         const itemUpdate = req.body;
+        console.log('Received update data:', itemUpdate);
+        console.log('POQuality in request:', itemUpdate.POQuality);
+        
         const existingItem = await PIModel.findOne({ where: { PIId: id } });;
         if (existingItem) {
             const existing = await PIModel.findOne({ where: { PINo: itemUpdate.PINo } });
@@ -111,6 +114,7 @@ export const update = async (req: Request, res: Response): Promise<void> => {
 
             await PIModel.update(itemUpdate, { where: { PIId: id } });
             const results = await getItems(id);
+            console.log('Updated PI data:', results[0]);
             res.status(200).json(results[0]);
         } else {
             const existing = await PIModel.findOne({ where: { PINo: itemUpdate.PINo } });
@@ -124,6 +128,7 @@ export const update = async (req: Request, res: Response): Promise<void> => {
             res.status(201).json(results[0]);
         }
     } catch (e: any) {
+        console.error('Update error:', e);
         if (e.name === 'SequelizeUniqueConstraintError') {
             res.status(409).send({ message: 'already exists' });
         } else {

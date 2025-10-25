@@ -3,6 +3,7 @@ export interface IPI {
     PIDate: string;
     GSTIn: string;
     PONumber: string;
+    POQuality: string;
     netQuantity: string,
     grossQuantity: string,
     shipDate: string;

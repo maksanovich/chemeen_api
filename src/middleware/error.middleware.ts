@@ -8,6 +8,16 @@ export const errorHandler = (
     next: NextFunction
 ) => {
     const status = error.statusCode || error.status || 500;
-
-    response.status(status).send(error);
+    const message = error.message || 'Internal Server Error';
+    
+    // Log error for debugging
+    console.error(`Error ${status}: ${message}`, error);
+    
+    // Send consistent error response
+    response.status(status).json({
+        success: false,
+        status,
+        message,
+        ...(process.env.NODE_ENV === 'development' && { stack: error.stack })
+    });
 };

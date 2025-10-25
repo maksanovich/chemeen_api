@@ -252,7 +252,7 @@ export const getFormattedTraceAbilityData = async (PIId: string) => {
             const existing = traceAbilityMap.get(item.ItemId);
             const total = parseFloat(item.totalCartons) || 0;
             const usedCase = parseFloat(existing?.usedCase || "0");
-            const balanceCase = existing ? parseFloat(existing.ballanceCase || "0") : total; // Use actual balance from database
+            const balanceCase = existing ? parseFloat(existing.ballanceCase || "0") : ""; // Use actual balance from database or blank
 
             return {
                 ItemId: item.ItemId,
@@ -267,7 +267,7 @@ export const getFormattedTraceAbilityData = async (PIId: string) => {
                 rawMaterialQty: existing?.rawMaterialQty || "0",
                 headlessQty: existing?.headlessQty || "0",
                 usedCase: existing?.usedCase || "0",
-                ballanceCase: balanceCase.toString(), // Use actual balance or default to total
+                ballanceCase: balanceCase === "" ? "" : balanceCase.toString(), // Use actual balance or blank
                 beforeDate: existing?.beforeDate || "",
             };
         });

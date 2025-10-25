@@ -86,23 +86,42 @@ export const getPDFById = async (req: Request, res: Response): Promise<void> => 
 export const downloadPDF = async (req: Request, res: Response): Promise<void> => {
     try {
         const { pdfId } = req.params;
+        console.log(`Attempting to download PDF with ID: ${pdfId}`);
+        
         const pdf = await ElisaPDFModel.findByPk(parseInt(pdfId));
         
         if (!pdf) {
-            res.status(404).json({ message: 'PDF not found' });
+            console.log(`PDF not found in database for ID: ${pdfId}`);
+            res.status(404).json({ 
+                message: 'PDF not found',
+                details: `No PDF found with ID: ${pdfId}`,
+                error: 'PDF_NOT_FOUND'
+            });
             return;
         }
 
         const filePath = pdf.get('filePath') as string;
+        console.log(`PDF found, file path: ${filePath}`);
         
         if (!fs.existsSync(filePath)) {
-            res.status(404).json({ message: 'File not found on server' });
+            console.log(`File not found on server at path: ${filePath}`);
+            res.status(404).json({ 
+                message: 'File not found on server',
+                details: `File not found at path: ${filePath}`,
+                error: 'FILE_NOT_FOUND'
+            });
             return;
         }
 
+        console.log(`Downloading file: ${filePath}`);
         res.download(filePath);
     } catch (error: any) {
-        res.status(500).json({ message: 'Download failed', error: error.message });
+        console.error('Download PDF error:', error);
+        res.status(500).json({ 
+            message: 'Download failed', 
+            details: error.message,
+            error: 'DOWNLOAD_ERROR'
+        });
     }
 };
 
