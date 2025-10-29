@@ -104,29 +104,23 @@ export const update = async (req: Request, res: Response): Promise<void> => {
         console.log('Received update data:', itemUpdate);
         console.log('POQuality in request:', itemUpdate.POQuality);
         
-        const existingItem = await PIModel.findOne({ where: { PIId: id } });;
-        if (existingItem) {
-            const existing = await PIModel.findOne({ where: { PINo: itemUpdate.PINo } });
-            if (existing) {
-                res.status(409).json({ message: "PI with this PINo already exists" });
-                return;
-            }
-
-            await PIModel.update(itemUpdate, { where: { PIId: id } });
-            const results = await getItems(id);
-            console.log('Updated PI data:', results[0]);
-            res.status(200).json(results[0]);
-        } else {
-            const existing = await PIModel.findOne({ where: { PINo: itemUpdate.PINo } });
-            if (existing) {
-                res.status(409).json({ message: "PI with this PINo already exists" });
-                return;
-            }
-
-            const newItem = await PIModel.create(itemUpdate);
-            const results = await getItems(newItem.dataValues.PIId);
-            res.status(201).json(results[0]);
+        const existingItem = await PIModel.findOne({ where: { PIId: id } });
+        if (!existingItem) {
+            res.status(404).json({ message: "PI not found" });
+            return;
         }
+
+        // Check if PINo already exists on a DIFFERENT PI
+        const existing = await PIModel.findOne({ where: { PINo: itemUpdate.PINo } });
+        if (existing && existing.dataValues.PIId !== parseInt(id)) {
+            res.status(409).json({ message: "PI with this PINo already exists" });
+            return;
+        }
+
+        await PIModel.update(itemUpdate, { where: { PIId: id } });
+        const results = await getItems(id);
+        console.log('Updated PI data:', results[0]);
+        res.status(200).json(results[0]);
     } catch (e: any) {
         console.error('Update error:', e);
         if (e.name === 'SequelizeUniqueConstraintError') {
