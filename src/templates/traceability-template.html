@@ -44,7 +44,8 @@
             margin-bottom: 20px;
         }
 
-        th, td {
+        th,
+        td {
             border: 1px solid #000;
             padding: 8px;
             text-align: left;
@@ -122,7 +123,7 @@
     <table class="product-table">
         <tr>
             <th style="width: 15%;">Product Code (Variety)</th>
-            <th style="width: 35%;">{{productName}}</th>
+            <th style="width: 35%;">{{variety}}</th>
             <th style="width: 15%;">Type of Packs</th>
             <th style="width: 35%;">{{packType}}</th>
         </tr>
@@ -145,7 +146,7 @@
                 <th style="width: 8%;">TOTAL</th>
                 <th style="width: 10%;">USED CASE</th>
                 <th style="width: 10%;">BALANCE CASE</th>
-                <th style="width: 15%;">TRACEABILITY</th>
+                <th style="width: 15%;">FARM</th>
                 <th style="width: 13%;">BEST BEFORE DATE</th>
             </tr>
         </thead>
@@ -176,11 +177,16 @@
             </tr>
         </tbody>
     </table>
-    
+
     {{#unless @last}}
     <div style="margin: 20px 0;"></div>
     {{/unless}}
     {{/each}}
+    {{#if createdAt}}
+    <div style="margin-top: 20px; text-align: right; font-size: 12px;">
+        <strong>Created At:</strong> {{createdAt}}
+    </div>
+    {{/if}}
 </body>
 
 </html>

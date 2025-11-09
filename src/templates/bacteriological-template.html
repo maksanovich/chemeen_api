@@ -11,6 +11,15 @@
             font-size: 12px;
         }
 
+        .page-break-container {
+            page-break-inside: avoid;
+            page-break-after: always;
+        }
+
+        .page-break-container:last-child {
+            page-break-after: auto;
+        }
+
         .header {
             text-align: center;
             margin-bottom: 20px;
@@ -75,87 +84,107 @@
             font-style: italic;
             font-weight: normal;
         }
+
+        .total {
+            font-weight: bold;
+            width: 20%;
+            font-size: 12px;
+            text-align: center;
+        }
     </style>
 </head>
 
 <body>
-    <div class="header">
-        <div class="approval-no">APPROVAL NO: {{approvalNo}}</div>
-        <div class="report-title">IN-HOUSE BACTERIOLOGICAL ANALYSIS REPORT</div>
-    </div>
-    
+
     {{#each reports}}
-    <table class="unified-table">
-        <tr>
-            <td colspan="5">
-                <div><strong>PROCESSOR :</strong> {{processorName}}</div>
-                <div><strong>EXPORTER :</strong> {{exporterName}}</div>
-            </td>
-            <td colspan="5">
-                <div><strong>SPECIES :</strong> {{species}}</div>
-            </td>
-        </tr>
-        <tr>
-            <td colspan="5">
-                <div><strong>BUYER :</strong> {{buyerName}}</div>
-                <div class="address-text">{{buyerAddress}}</div>
-                <div><strong>PO NO :</strong> {{poNumber}}</div>
-            </td>
-            <td colspan="5">
-                <div><strong>TOTAL NO OF MC/S :</strong> {{totalMCs}}</div>
-                <div><strong>GRADE :</strong> {{grade}}</div>
-                <div><strong>PRODUCTION CODE :</strong> {{productionCode}}</div>
-                <div><strong>TRACEABILITY :</strong> {{traceability}}</div>
-            </td>
-        </tr>
-        <tr>
-            <td class="left-column" colspan='5'>
-                <div><strong>VARIETY :</strong> {{variety}}</div>
-            </td>
-            <td class="right-column" colspan='5'>
-                <div><strong>TYPE OF PACKING :</strong> {{packingType}}</div>
-                <div><strong>TYPE OF SAMPLING :</strong> {{samplingType}}</div>
-            </td>
-        </tr>
+    <div class="page-break-container">
+        <div class="header">
+            <div class="approval-no">APPROVAL NO: {{approvalNo}}</div>
+            <div class="report-title">IN-HOUSE BACTERIOLOGICAL ANALYSIS REPORT</div>
+        </div>
+        <table class="unified-table">
+            <tr>
+                <td colspan="5">
+                    <div><strong>PROCESSOR :</strong> {{processorName}}</div>
+                    <div><strong>EXPORTER :</strong> {{exporterName}}</div>
+                </td>
+                <td colspan="5">
+                    <div><strong>SPECIES :</strong> {{species}}</div>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="5">
+                    <div><strong>BUYER :</strong> {{buyerName}}</div>
+                    <div class="address-text">{{buyerAddress}}</div>
+                    <div><strong>PO NO :</strong> {{poNumber}}</div>
+                </td>
+                <td colspan="5">
+                    <div><strong>TOTAL NO OF MC/S :</strong> {{totalMCs}}</div>
+                    <div><strong>GRADE :</strong> {{grade}}</div>
+                    <div><strong>PRODUCTION CODE :</strong> {{productionCode}}</div>
+                    <div><strong>FARM :</strong> {{traceability}}</div>
+                </td>
+            </tr>
+            <tr>
+                <td class="left-column" colspan='5'>
+                    <div><strong>VARIETY :</strong> {{variety}}</div>
+                </td>
+                <td class="right-column" colspan='5'>
+                    <div><strong>TYPE OF PACKING :</strong> {{packingType}}</div>
+                    <div><strong>TYPE OF SAMPLING :</strong> {{samplingType}}</div>
+                </td>
+            </tr>
 
-        <!-- Method of Test Section -->
-        <tr>
-            <td colspan="10" class="method-section">
-                METHOD OF TEST : AS FOR BAM-BACTERIOLOGICAL ANALYTICAL MANUAL
-            </td>
-        </tr>
+            <!-- Method of Test Section -->
+            <tr>
+                <td colspan="10" class="method-section">
+                    METHOD OF TEST : BAM - Bacteriological Analytical Manual + ISO - ALL
+                </td>
+            </tr>
 
-        <!-- Table Headers -->
-        <tr>
-            <th style="width: 10%;">Code</th>
-            <th style="width: 10%;">Date of Analysis</th>
-            <th style="width: 10%;">Date of Completion</th>
-            <th style="width: 10%;">Total plate count/gm at 37°C</th>
-            <th style="width: 10%;">E. coli C.F.U/gm</th>
-            <th style="width: 10%;">S. aureus C.F.U/gm</th>
-            <th style="width: 10%;">Salmonella / 25 gm</th>
-            <th style="width: 10%;">Vibrio cholera / 25 gm</th>
-            <th style="width: 10%;">Vibrio Parahaemolyticus / 25 gm</th>
-            <th style="width: 10%;">Listeria monocytogenes 25/GM</th>
-        </tr>
+            <!-- Table Headers -->
+            <tr>
+                <th style="width: 10%;">Code</th>
+                <th style="width: 10%;">Date of Analysis</th>
+                <th style="width: 10%;">Date of Completion</th>
+                <th style="width: 10%;">Total plate count / gm at 37°C</th>
+                <th style="width: 10%;">E. coli C.F.U / gm</th>
+                <th style="width: 10%;">S. aureus C.F.U / gm</th>
+                <th style="width: 10%;">Salmonella / 25 gm</th>
+                <th style="width: 10%;">Vibrio cholera / 25 gm</th>
+                <th style="width: 10%;">Vibrio Parahae molyticus / 25 gm</th>
+                <th style="width: 10%;">Listeria monocytogenes 25 / GM</th>
+            </tr>
 
-        <!-- Data Rows -->
-        {{#each analysisResults}}
-        <tr>
-            <td style="width: 10%;"><strong>{{code}}</strong></td>
-            <td style="width: 10%;"><strong>{{analysisDate}}</strong></td>
-            <td style="width: 10%;"><strong>{{completionDate}}</strong></td>
-            <td style="width: 10%;"><strong>{{totalPlateCount}} CFU/GM</strong></td>
-            <td style="width: 10%;"><strong>{{eColi}}</strong></td>
-            <td style="width: 10%;"><strong>{{sAureus}}</strong></td>
-            <td style="width: 10%;"><strong>{{salmonella}}</strong></td>
-            <td style="width: 10%;"><strong>{{vibrioCholera}}</strong></td>
-            <td style="width: 10%;"><strong>{{vibrioParahaemolyticus}}</strong></td>
-            <td style="width: 10%;"><strong>{{listeriaMonocytogenes}}</strong></td>
-        </tr>
-        {{/each}}
-    </table>
-    
+            <!-- Data Rows -->
+            {{#each analysisResults}}
+            <tr>
+                <td style="width: 10%;"><strong>{{code}}</strong></td>
+                <td style="width: 10%;"><strong>{{analysisDate}}</strong></td>
+                <td style="width: 10%;"><strong>{{completionDate}}</strong></td>
+                <td style="width: 10%;"><strong>{{totalPlateCount}} CFU / GM</strong></td>
+                <td style="width: 10%;"><strong>{{eColi}} / g</strong></td>
+                <td style="width: 10%;"><strong>{{sAureus}} / g</strong></td>
+                <td style="width: 10%;"><strong>{{salmonella}} / 25 g</strong></td>
+                <td style="width: 10%;"><strong>{{vibrioCholera}} / 25 g</strong></td>
+                <td style="width: 10%;"><strong>{{vibrioParahaemolyticus}} / 25 g</strong></td>
+                <td style="width: 10%;"><strong>{{listeriaMonocytogenes}} / 25 g</strong></td>
+            </tr>
+            {{/each}}
+            <tr>
+                <td colspan="12" style="height: 80px;">
+                    <div class="total" style="width: 100%; font-size: 12px;">
+                        These codes are organoleptically and microbiologically tested and found Export worthy.
+                    </div>
+                </td>
+            </tr>
+        </table>
+        {{#if createdAt}}
+        <div style="margin-top: 20px; text-align: right; font-size: 12px;">
+            <strong>Created At:</strong> {{createdAt}}
+        </div>
+        {{/if}}
+    </div>
     {{#unless @last}}
     <div style="margin: 50px 0;"></div>
     {{/unless}}

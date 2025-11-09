@@ -12,7 +12,6 @@ import { amount2word } from '../../common/utils';
 export const exportPIPDF = async (req: Request, res: Response): Promise<void> => {
     const id: string = req.params.id;
     try {
-        // Get PI data
         const piData: any = await getPI(id);
         piData.shipDate = formatDate(piData.shipDate);
 
@@ -25,7 +24,6 @@ export const exportPIPDF = async (req: Request, res: Response): Promise<void> =>
 
         piData.items = itemData;
 
-        // Calculate PI totals
         let totalCartons = 0;
         let totalKgQty = 0;
         let totalAmount = 0;
@@ -42,7 +40,7 @@ export const exportPIPDF = async (req: Request, res: Response): Promise<void> =>
         piData.totalKgQty = totalKgQty.toFixed(2);
         piData.totalAmount = totalAmount.toFixed(2);
         piData.totalGrossQty = (totalCartons * 17).toFixed(2);
-        
+
         piData.amountsWord = amount2word(totalAmount);
 
         if (!piData) {
@@ -50,7 +48,6 @@ export const exportPIPDF = async (req: Request, res: Response): Promise<void> =>
             return;
         }
 
-        // Generate PI PDF
         const piTemplatePath = path.join(__dirname, '../../templates/pi-template.html');
         const piResult: any = await generatePDF(piTemplatePath, piData);
 
@@ -60,7 +57,6 @@ export const exportPIPDF = async (req: Request, res: Response): Promise<void> =>
         }
 
 
-        // Return PI PDF directly for web viewing
         const fileName = `PI-${piData.PINo}-${piData.PIDate}.pdf`;
         res.setHeader('Content-Type', 'application/pdf');
         res.setHeader('Content-Disposition', `inline; filename="${fileName}"`);
@@ -76,72 +72,21 @@ export const exportPIPDF = async (req: Request, res: Response): Promise<void> =>
 export const exportCodeListPDF = async (req: Request, res: Response): Promise<void> => {
     const id: string = req.params.id;
     try {
-        const piData: any = await getPI(id);
-        const codeListData: any = await getCodeList(id);
+        const [piData, codeListData] = await Promise.all([getPI(id), getCodeList(id)]);
+        const products = groupCodeListByProduct(codeListData, piData);
+        // Get createdAt from PI data
+        const createdAt = (piData as any).createdAt ? format(new Date((piData as any).createdAt), "dd/MM/yyyy") : '';
 
-        const grouped = Object.values(
-            codeListData.reduce((acc: any, item: any) => {
-                const key = `${item.code}_${item.PRSName}_${item.PRSTName}`;
-
-                if (!acc[key]) {
-                    acc[key] = {
-                        code: item.code,
-                        PRSName: item.PRSName,
-                        PRSTName: item.PRSTName,
-                        PRSPWSStyle: item.PRSPWSStyle,
-                        PRSPPiece: item.PRSPPiece,
-                        PRSPWeight: item.PRSPWeight,
-                        data: []
-                    };
-                }
-
-                acc[key].data.push({
-                    value: item.value,
-                    PRSGDesc: item.PRSGDesc
-                });
-
-                return acc;
-            }, {} as any)
-        );
-
-        const templateData: any = {
-            companyName: piData.ecName,
-            companyAddress: piData.ecAddress,
-            consigneeName: piData.ccName,
-            invoiceNumber: piData.PINo,
-            invoiceDate: piData.PIDate,
-            certificateNumber: "QC-2024-001",
-            certificateDate: piData.PIDate,
-            documentDate: piData.PIDate,
-
-            products: grouped.map((product: any) => {
-                const codeValues = product.data.map((item: any) => item.PRSGDesc);
-                const values = product.data.map((item: any) => item.value);
-                const pieceWeight = (parseInt(product.PRSPPiece) * parseInt(product.PRSPWeight)).toString();
-                const totalValue = product.data.reduce((sum: number, item: any) => sum + (item.value || 0), 0);
-
-                return {
-                    ...product,
-                    codeValues,
-                    values,
-                    pieceWeight,
-                    totalValue
-                };
-            })
+        const templateData = {
+            createdAt,
+            products
         };
-
-        // Calculate grand total
-        templateData.grandTotal = grouped.reduce((sum: number, product: any) => {
-            return sum + product.data.reduce((productSum: number, item: any) => productSum + (item.value || 0), 0);
-        }, 0);
-
-        // Generate PDF using Handlebars template
         const templatePath = path.join(__dirname, '../../templates/codelist-template.html');
         const result: any = await generatePDF(templatePath, templateData);
 
         if (result.success) {
             const buffer = result.data;
-            const fileName = `CodeList-${piData.PINo}-${new Date().toISOString().split('T')[0]}.pdf`;
+            const fileName = `CodeList-${(piData as any).PINo}-${new Date().toISOString().split('T')[0]}.pdf`;
             res.setHeader('Content-Type', 'application/pdf');
             res.setHeader('Content-Disposition', `inline; filename="${fileName}"`);
             res.setHeader('Content-Length', buffer.length);
@@ -154,6 +99,137 @@ export const exportCodeListPDF = async (req: Request, res: Response): Promise<vo
         res.status(500).send(e);
     }
 }
+
+interface CodeEntry {
+    code: string;
+    farmId: string;
+    ageCategories: Map<string, number>;
+}
+
+interface ProductData {
+    exporterName: string;
+    variety: string;
+    typeOfPacks: string;
+    piNo: string;
+    buyer: string;
+    codesMap: Map<string, CodeEntry>;
+}
+
+interface ProductOutput {
+    processorCode: string;
+    exporterName: string;
+    variety: string;
+    typeOfPacks: string;
+    piNo: string;
+    buyer: string;
+    ageCategories: string[];
+    codes: any[];
+    productTotals: number[];
+    scaleTotals: number[];
+    grandTotal: number;
+    grandTotalScale: number;
+    sampleScale: string;
+}
+
+const calculateScale = (value: number): number => {
+    return value === 0 ? 0 : Math.round((Math.sqrt(value) + 1) / 2);
+};
+
+const groupCodeListByProduct = (codeListData: any[], piData: any): ProductOutput[] => {
+    const productsMap = new Map<string | number, ProductData>();
+
+    for (const item of codeListData) {
+        const productKey = item.ItemId || `${item.PRSName}_${item.PRSTName}`;
+        
+        if (!productsMap.has(productKey)) {
+            productsMap.set(productKey, {
+                exporterName: piData.ecName || "M/S.GAYATRI AQUA PRODUCTS PRIVATE LIMITED",
+                variety: `${piData.pcCountry} ${item.PRSTName} ${item.PRSName}`,
+                typeOfPacks: `${item.PRSPPiece} X ${item.PRSPWeight}${item.PRSPWUnit}`,
+                piNo: piData.PONumber || "KRS-9017",
+                buyer: piData.ccName || "MATSUOKA CO. LTD.,",
+                codesMap: new Map<string, CodeEntry>()
+            });
+        }
+
+        const product = productsMap.get(productKey)!;
+        const codeKey = `${item.code}_${item.farmName}`;
+
+        if (!product.codesMap.has(codeKey)) {
+            product.codesMap.set(codeKey, {
+                code: item.code,
+                farmId: item.farmName,
+                ageCategories: new Map<string, number>()
+            });
+        }
+
+        if (item.PRSGDesc) {
+            const codeEntry = product.codesMap.get(codeKey)!;
+            const value = parseFloat(item.value) || 0;
+            const currentValue = codeEntry.ageCategories.get(item.PRSGDesc) || 0;
+            codeEntry.ageCategories.set(item.PRSGDesc, currentValue + value);
+        }
+    }
+
+    return Array.from(productsMap.values()).map(product => {
+        const codes = Array.from(product.codesMap.values());
+
+        const ageCategoriesSet = new Set<string>();
+        codes.forEach(code => {
+            code.ageCategories.forEach((value, category) => {
+                if (value > 0) ageCategoriesSet.add(category);
+            });
+        });
+        const sortedAgeCategories = Array.from(ageCategoriesSet).sort();
+
+        const transformedCodes = codes.map(codeEntry => {
+            const values = sortedAgeCategories.map(cat => codeEntry.ageCategories.get(cat) || 0);
+            const scales = values.map(calculateScale);
+            const total = values.reduce((sum, v) => sum + v, 0);
+            const totalScale = scales.reduce((sum, v) => sum + v, 0);
+
+            return {
+                code: codeEntry.code,
+                farmId: codeEntry.farmId,
+                ageCategoryValues: values,
+                ageCategoryScale: scales,
+                total,
+                totalScale
+            };
+        });
+
+        const productTotals = sortedAgeCategories.map(category =>
+            codes.reduce((sum, code) => sum + (code.ageCategories.get(category) || 0), 0)
+        );
+        const scaleTotals = sortedAgeCategories.map(category =>
+            codes.reduce((sum, code) => sum + calculateScale(code.ageCategories.get(category) || 0), 0)
+        );
+        const grandTotal = productTotals.reduce((sum, v) => sum + v, 0);
+        const grandTotalScale = scaleTotals.reduce((sum, v) => sum + v, 0);
+
+        // Get createdAt from PI data
+        const createdAt = (piData as any).createdAt 
+            ? format(new Date((piData as any).createdAt), "dd/MM/yyyy") 
+            : '';
+
+        return {
+            processorCode: piData.pcApprovalNo,
+            exporterName: product.exporterName,
+            variety: product.variety,
+            typeOfPacks: product.typeOfPacks,
+            piNo: product.piNo,
+            buyer: product.buyer,
+            ageCategories: sortedAgeCategories,
+            codes: transformedCodes,
+            productTotals,
+            scaleTotals,
+            grandTotal,
+            grandTotalScale,
+            sampleScale: `${grandTotal} + 1/2 = 20MCS`,
+            createdAt
+        };
+    });
+};
 
 export const exportTraceabilityPDF = async (req: Request, res: Response): Promise<void> => {
     const id: string = req.params.id;
@@ -176,20 +252,21 @@ export const exportTraceabilityPDF = async (req: Request, res: Response): Promis
             })
         );
 
-        const products = transformProducts(results);
+        const products = transformProducts(results, piData);
+        // Get createdAt from PI data
+        const createdAt = piData.createdAt ? format(new Date(piData.createdAt), "dd/MM/yyyy") : '';
         const templateData = {
             processorCode: piData.pcApprovalNo,
             processorName: piData.pcName,
             exporterName: piData.ecName || "M/S.GAYATRI AQUA PRODUCTS PRIVATE LIMITED",
             poNumber: piData.PONumber || "KRS-9017",
             buyerName: piData.ccName || "MATSUOKA CO. LTD.,",
+            createdAt,
             products: products
         };
 
-        // Generate PDF using Handlebars template
         const templatePath = path.join(__dirname, '../../templates/traceability-template.html');
         const result: any = await generatePDF(templatePath, templateData);
-
         if (result.success) {
             const buffer = result.data;
             const fileName = `Traceability-${piData.PINo || 'Report'}-${new Date().toISOString().split('T')[0]}.pdf`;
@@ -213,10 +290,12 @@ export const exportBacteriologicalPDF = async (req: Request, res: Response): Pro
         const BARData: any = await getBAR(id);
         const results = await Promise.all(
             BARData.map(async (item: any) => {
+
                 const details = await getItemDetail(item.ItemId);
-
-
-                const grade = details.map((d: any) => d.size).join(",   ");
+                const grade = details
+                    .filter((d: any) => d.cartons && parseFloat(d.cartons) > 0)
+                    .map((d: any) => d.size)
+                    .join(",   ");
                 const farm: any = await getFarm(item.code);
 
                 return {
@@ -226,10 +305,9 @@ export const exportBacteriologicalPDF = async (req: Request, res: Response): Pro
                 };
             })
         );
-        
+
         const templateData = transformBARProducts(results, piData);
         templateData.approvalNo = piData.pcApprovalNo
-        
         const templatePath = path.join(__dirname, '../../templates/bacteriological-template.html');
         const result: any = await generatePDF(templatePath, templateData);
 
@@ -277,7 +355,6 @@ export const exportAllPDFs = async (req: Request, res: Response): Promise<void> 
 const generatePDF = (templatePath: string, data: any): Promise<{ success: boolean; data?: Buffer }> => {
     const htmlTemplate = fs.readFileSync(templatePath, 'utf8');
 
-    // Register Handlebars helpers
     Handlebars.registerHelper('times', function (n: number, block: any) {
         let accum = '';
         for (let i = 0; i < n; ++i) {
@@ -290,10 +367,8 @@ const generatePDF = (templatePath: string, data: any): Promise<{ success: boolea
         return a - b;
     });
 
-    // Compile Handlebars template
     const template = Handlebars.compile(htmlTemplate);
 
-    // Render template with data
     const html = template(data);
 
     return new Promise((resolve, reject) => {
@@ -321,7 +396,6 @@ const generatePIPDF = async (id: string): Promise<{ success: boolean; data?: Buf
 
         piData.items = itemData;
 
-        // Calculate PI totals
         let totalCartons = 0;
         let totalKgQty = 0;
         let totalAmount = 0;
@@ -338,9 +412,9 @@ const generatePIPDF = async (id: string): Promise<{ success: boolean; data?: Buf
         piData.totalKgQty = totalKgQty.toFixed(2);
         piData.totalAmount = totalAmount.toFixed(2);
         piData.totalGrossQty = (totalCartons * 17).toFixed(2);
-        
+
         piData.amountsWord = amount2word(piData.totalAmount);
-        
+
         const piTemplatePath = path.join(__dirname, '../../templates/pi-template.html');
         return await generatePDF(piTemplatePath, piData);
     } catch (e) {
@@ -405,10 +479,12 @@ const generateCodeListPDF = async (id: string): Promise<{ success: boolean; data
             })
         };
 
-        // Calculate grand total
         templateData.grandTotal = grouped.reduce((sum: number, product: any) => {
             return sum + product.data.reduce((productSum: number, item: any) => productSum + (item.value || 0), 0);
         }, 0);
+
+        // Get createdAt from PI data
+        templateData.createdAt = piData.createdAt ? format(new Date(piData.createdAt), "dd/MM/yyyy") : '';
 
         const templatePath = path.join(__dirname, '../../templates/codelist-template.html');
         return await generatePDF(templatePath, templateData);
@@ -436,13 +512,16 @@ const generateTraceabilityPDF = async (id: string): Promise<{ success: boolean; 
             })
         );
 
-        const products = transformProducts(results);
+        const products = transformProducts(results, piData);
+        // Get createdAt from PI data
+        const createdAt = piData.createdAt ? format(new Date(piData.createdAt), "dd/MM/yyyy") : '';
         const templateData = {
             processorCode: piData.pcApprovalNo,
             processorName: piData.pcName,
             exporterName: piData.ecName || "M/S.GAYATRI AQUA PRODUCTS PRIVATE LIMITED",
             poNumber: piData.PONumber || "KRS-9017",
             buyerName: piData.ccName || "MATSUOKA CO. LTD.,",
+            createdAt,
             products: products
         };
 
@@ -471,10 +550,10 @@ const generateBacteriologicalPDF = async (id: string): Promise<{ success: boolea
                 };
             })
         );
-        
+
         const templateData = transformBARProducts(results, piData);
         templateData.approvalNo = piData.pcApprovalNo;
-        
+
         const templatePath = path.join(__dirname, '../../templates/bacteriological-template.html');
         return await generatePDF(templatePath, templateData);
     } catch (e) {
@@ -501,6 +580,7 @@ const getPI = async (id: string) => {
             pi.GSTIn as GSTIn,
             pi.PONumber as PONumber,
             pi.shipDate as shipDate,
+            pi.createdAt as createdAt,
             ec.companyName AS ecName,
             ec.address1 as ecAddress,
             ec.city as ecCity,
@@ -630,14 +710,16 @@ const getFarm = async (code: string) => {
 }
 
 const getCodeList = async (id: string) => {
-    const query = `SELECT cl.code, cl.value, prs.PRSName, prst.PRSTName, prsg.PRSGDesc, prsp.PRSPPiece, prsp.PRSPWeight, prspws.PRSPWSStyle
+    const query = `SELECT cl.ItemId, cl.code, cl.value, prs.PRSName, prst.PRSTName, prsg.PRSGDesc, prsp.PRSPPiece, prsp.PRSPWeight, prspw.PRSPWUnit, prspws.PRSPWSStyle, c.companyName as farmName
             FROM tbl_code_list AS cl
             LEFT JOIN tbl_items AS item ON item.ItemId = cl.ItemId
             LEFT JOIN tbl_prs as prs ON item.PRSId = prs.PRSId
             LEFT JOIN tbl_prst as prst on item.PRSTId = prst.PRSTId
             LEFT JOIN tbl_prsg as prsg ON prsg.PRSGId = cl.PRSGId
             LEFT JOIN tbl_prsp as prsp ON prsp.PRSPId = item.PRSPId
+            LEFT JOIN tbl_prspw as prspw ON prspw.PRSPWId = prsp.PRSPWId
             LEFT JOIN tbl_prspws as prspws ON prspws.PRSPWSId = prsp.PRSPWSId
+            LEFT JOIN tbl_companies as c ON c.companyId = cl.farmId
             WHERE cl.PIId = :id;`;
     const results = await sequelize.query(query, {
         replacements: { id },
@@ -647,9 +729,11 @@ const getCodeList = async (id: string) => {
 }
 
 const getTraceability = async (id: string) => {
-    const query = `SELECT prsv.PRSVDesc, prsp.PRSPPiece, prsp.PRSPWeight, prspw.        PRSPWUnit, ta.*
+    const query = `SELECT prsv.PRSVDesc, prs.PRSName, prst.PRSTName, prsp.PRSPPiece, prsp.PRSPWeight, prspw.PRSPWUnit, ta.*
         from tbl_trace_ability as ta
         LEFT JOIN tbl_items AS item ON item.ItemId = ta.ItemId
+        LEFT JOIN tbl_prs as prs ON item.PRSId = prs.PRSId
+        LEFT JOIN tbl_prst as prst ON item.PRSTId = prst.PRSTId
         LEFT JOIN tbl_prsv as prsv ON item.PRSVId = prsv.PRSVId
         LEFT JOIN tbl_prsp as prsp ON item.PRSPId = prsp.PRSPId
         LEFT JOIN tbl_prspw as prspw ON prspw.PRSPWId = prsp.PRSPWId
@@ -662,10 +746,11 @@ const getTraceability = async (id: string) => {
 }
 
 const getBAR = async (id: string) => {
-    const query = `SELECT prsv.PRSVDesc, prs.PRSName, prsp.PRSPPiece, prsp.PRSPWeight, prspw.PRSPWUnit, bar.*
+    const query = `SELECT prsv.PRSVDesc, prs.PRSName, prst.PRSTName, prsp.PRSPPiece, prsp.PRSPWeight, prspw.PRSPWUnit, bar.*
         from tbl_bar as bar
         LEFT JOIN tbl_items AS item ON item.ItemId = bar.ItemId
         LEFT JOIN tbl_prs prs ON item.PRSId = prs.PRSId
+        LEFT JOIN tbl_prst as prst ON item.PRSTId = prst.PRSTId
         LEFT JOIN tbl_prsv as prsv ON item.PRSVId = prsv.PRSVId
         LEFT JOIN tbl_prsp as prsp ON item.PRSPId = prsp.PRSPId
         LEFT JOIN tbl_prspw as prspw ON prspw.PRSPWId = prsp.PRSPWId
@@ -677,14 +762,15 @@ const getBAR = async (id: string) => {
     return results;
 }
 
-const transformProducts = (data: any[]) => {
+const transformProducts = (data: any[], piData: any = {}) => {
     const grouped = Object.values(
         data.reduce((acc: any, item: any) => {
             if (!acc[item.ItemId]) {
                 acc[item.ItemId] = {
                     productName: item.PRSVDesc.trim(),
+                    variety: `${piData.pcCountry || ''} ${item.PRSTName || ''} ${item.PRSName || ''}`.trim(),
                     packType: `${item.PRSPPiece}X${item.PRSPWeight}${item.PRSPWUnit}`,
-                    gradeSet: new Set(), // collect unique grades
+                    gradeSet: new Set(),
                     productionData: [],
                     totals: { raw: 0, headless: 0, cases: 0, used: 0, balance: 0 }
                 };
@@ -700,7 +786,7 @@ const transformProducts = (data: any[]) => {
                 total: item.total,
                 usedCase: item.usedCase,
                 balanceCase: item.ballanceCase,
-                traceability: item.farmName, // if this is traceability code
+                traceability: item.farmName,
                 bestBeforeDate: format(new Date(item.beforeDate), "dd/MM/yyyy")
             });
 
@@ -716,6 +802,7 @@ const transformProducts = (data: any[]) => {
 
     return grouped.map((g: any) => ({
         productName: g.productName,
+        variety: g.variety,
         packType: g.packType,
         grade: "GRADE:" + Array.from(g.gradeSet).join(","),
         sampleScale: `SAMPLE SCALE = √${g.totals.raw}+1/2 =20MCS`,
@@ -728,7 +815,8 @@ const transformProducts = (data: any[]) => {
     }));
 };
 
-function transformBARProducts(data: any[], piData: any = {}): any {
+function
+    transformBARProducts(data: any[], piData: any = {}): any {
     if (!Array.isArray(data)) data = [];
 
     const groups = new Map<any, any[]>();
@@ -767,6 +855,54 @@ function transformBARProducts(data: any[], piData: any = {}): any {
 
         const packingType = `${first.PRSPPiece ?? 1}X${first.PRSPWeight ?? 0}${first.PRSPWUnit ?? ''}.`;
 
+        const isChinaDestination = piData.dpCountry &&
+            piData.dpCountry.toString().trim().toLowerCase().includes('china');
+
+        let analysisResults: any[] = items.map((d: any) => ({
+            code: d.code,
+            analysisDate: d.analysisDate ? format(new Date(d.analysisDate), "dd/MM/yyyy") : '',
+            completionDate: d.completionDate ? format(new Date(d.completionDate), "dd/MM/yyyy") : '',
+            totalPlateCount: d.totalPlateCnt,
+            eColi: d.ECFU,
+            sAureus: d.SCFU,
+            salmonella: d.salmone,
+            vibrioCholera: d.vibrioC,
+            vibrioParahaemolyticus: d.vibrioP,
+            listeriaMonocytogenes: d.listeria
+        }));
+
+        if (isChinaDestination) {
+            const expandedResults: any[] = [];
+            analysisResults.forEach((result) => {
+                const basePlateCount = parseFloat(result.totalPlateCount) || 0;
+
+                for (let i = 0; i < 5; i++) {
+                    let modifiedPlateCount: number;
+
+                    if (i === 0) {
+                        modifiedPlateCount = basePlateCount;
+                    } else {
+                        const multiplier = 1 - (i * 0.2);
+                        modifiedPlateCount = Math.round(basePlateCount * multiplier);
+                        if (basePlateCount > 0 && modifiedPlateCount < 1) {
+                            modifiedPlateCount = 1;
+                        }
+                    }
+
+                    expandedResults.push({
+                        ...result,
+                        totalPlateCount: modifiedPlateCount
+                    });
+                }
+            });
+            analysisResults = expandedResults;
+        }
+
+        // Get createdAt from PI data
+        const createdAt = (piData as any).createdAt 
+            ? format(new Date((piData as any).createdAt), "dd/MM/yyyy") 
+            : '';
+
         return {
             approvalNo: piData.pcApprovalNo || "1904",
             processorName: piData.pcName || "M/S.THARANGINI SEA FOODS",
@@ -774,7 +910,7 @@ function transformBARProducts(data: any[], piData: any = {}): any {
             buyerName: piData.ccName || "Vietnam Rich Beauty Foods Co., Ltd",
             buyerAddress: piData.ccAddress || "T un son Fish Harbour, Quang Long Doai village, T hai T huy, T hai Binh Provience, Vietnam",
             poNumber: piData.PONumber || "WPE-002",
-            variety: first.PRSVDesc?.toString().trim() || "Variety",
+            variety: `${piData.pcCountry || ''} ${first.PRSTName || ''} ${first.PRSName || ''}`.trim(),
             species: first.PRSName?.toString().trim() || "Species",
             totalMCs: "1500",
             grade,
@@ -782,18 +918,8 @@ function transformBARProducts(data: any[], piData: any = {}): any {
             traceability: farms.join(', '),
             packingType,
             samplingType: "COMPOSITE",
-            analysisResults: items.map((d: any) => ({
-                code: d.code,
-                analysisDate: d.analysisDate,
-                completionDate: d.completionDate,
-                totalPlateCount: d.totalPlateCnt,
-                eColi: d.ECFU,
-                sAureus: d.SCFU,
-                salmonella: d.salmone,
-                vibrioCholera: d.vibrioC,
-                vibrioParahaemolyticus: d.vibrioP,
-                listeriaMonocytogenes: d.listeria
-            }))
+            createdAt,
+            analysisResults
         };
     });
 

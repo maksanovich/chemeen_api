@@ -130,15 +130,37 @@ export const update = async (req: Request, res: Response): Promise<void> => {
             return;
         }
 
-        // Delete existing entries and create new ones with validated balances
-        await TraceAbilityModel.destroy({ where: { PIId: PIId } });
-        
+        // Update or create records based on ItemId+code combination
+        // This ensures each ItemId+code pair is handled independently
         await Promise.all(data.map(async (detail) => {
-            return await TraceAbilityModel.create({
-                ...detail,
-                PIId,
-                ballanceCase: detail.ballanceCase || '0', // Use user input
-            });
+            const whereClause = {
+                PIId: PIId,
+                ItemId: detail.ItemId,
+                code: detail.code
+            };
+
+            // Check if record exists
+            const existing = await TraceAbilityModel.findOne({ where: whereClause });
+
+            if (existing) {
+                // Update existing record (including code field)
+                await TraceAbilityModel.update({
+                    productDate: detail.productDate,
+                    rawMaterialQty: detail.rawMaterialQty,
+                    headlessQty: detail.headlessQty,
+                    code: detail.code,
+                    usedCase: detail.usedCase || '0',
+                    ballanceCase: detail.ballanceCase || '0',
+                    beforeDate: detail.beforeDate || '',
+                }, { where: whereClause });
+            } else {
+                // Create new record
+                await TraceAbilityModel.create({
+                    ...detail,
+                    PIId,
+                    ballanceCase: detail.ballanceCase || '0', // Use user input
+                });
+            }
         }));
 
         const results = await getItem(PIId);
@@ -227,6 +249,7 @@ export const getFormattedTraceAbilityData = async (PIId: string) => {
         const traceAbilityQuery = `
             SELECT 
                 ItemId,
+                code,
                 productDate,
                 rawMaterialQty,
                 headlessQty,
@@ -242,14 +265,15 @@ export const getFormattedTraceAbilityData = async (PIId: string) => {
             type: QueryTypes.SELECT
         });
 
-        // Create a map of existing traceability data by ItemId
+        // Create a map of existing traceability data by ItemId+code combination
+        // This ensures each unique ItemId+code pair gets its own traceability data
         const traceAbilityMap = new Map(
-            traceAbilityData.map((item: any) => [item.ItemId, item])
+            traceAbilityData.map((item: any) => [`${item.ItemId}-${item.code}`, item])
         );
 
         // Format the data combining code list and traceability data
         const formattedData = codeListData.map((item: any) => {
-            const existing = traceAbilityMap.get(item.ItemId);
+            const existing = traceAbilityMap.get(`${item.ItemId}-${item.code}`);
             const total = parseFloat(item.totalCartons) || 0;
             const usedCase = parseFloat(existing?.usedCase || "0");
             const balanceCase = existing ? parseFloat(existing.ballanceCase || "0") : ""; // Use actual balance from database or blank
