@@ -106,14 +106,11 @@ export const create = async (req: Request, res: Response): Promise<void> => {
             return;
         }
 
-        // Use a transaction for consistency
         await sequelize.transaction(async (t) => {
-            // Validate each detail before creating
             await Promise.all(
                 data.map(async (detail) => {
                     const { ItemId, PRSGId, value } = detail;
                     
-                    // Validate the value before creating
                     if (ItemId && PRSGId && value !== undefined) {
                         await validateValueUpdate(ItemId, PRSGId, Number(value), null, t);
                     }
@@ -130,7 +127,6 @@ export const create = async (req: Request, res: Response): Promise<void> => {
     } catch (e) {
         console.log(JSON.stringify(e), 'error');
         
-        // Check if it's a validation error and format it properly
         if (e instanceof Error && e.message.includes('Cannot create code list entry')) {
             res.status(400).send({ 
                 error: 'Validation Error',
@@ -147,10 +143,8 @@ export const create = async (req: Request, res: Response): Promise<void> => {
     }
 };
 
-// Helper function to validate if the new value is within allowed limits
 const validateValueUpdate = async (ItemId: number, PRSGId: number, newValue: number, codeId: number | null, transaction: any) => {
     try {
-        // Get the cartons value from tbl_item_details for the specific ItemId and PRSGId
         const itemDetail = await ItemDetailModel.findOne({
             where: { ItemId, PRSGId },
             transaction
@@ -162,7 +156,6 @@ const validateValueUpdate = async (ItemId: number, PRSGId: number, newValue: num
 
         const maxCartons = Number((itemDetail as any).cartons) || 0;
         
-        // Get the grade description
         const gradeQuery = `
             SELECT PRSGDesc FROM tbl_prsg WHERE PRSGId = :PRSGId
         `;
@@ -173,16 +166,13 @@ const validateValueUpdate = async (ItemId: number, PRSGId: number, newValue: num
         });
         const gradeDesc = gradeResult.length > 0 ? gradeResult[0].PRSGDesc : `Grade ${PRSGId}`;
         
-        // Get all current code list entries for this ItemId and PRSGId
         const currentEntries = await CodeListModel.findAll({
             where: { ItemId, PRSGId },
             transaction
         });
 
-        // Calculate current total value for this ItemId and PRSGId
         let currentTotal = currentEntries.reduce((sum, entry) => sum + (Number((entry as any).value) || 0), 0);
         
-        // If we're updating an existing record, subtract its current value from the total
         if (codeId) {
             const existingEntry = currentEntries.find(entry => (entry as any).codeId === codeId);
             if (existingEntry) {
@@ -190,7 +180,6 @@ const validateValueUpdate = async (ItemId: number, PRSGId: number, newValue: num
             }
         }
         
-        // Add the new value to get the new total
         const newTotal = currentTotal + newValue;
         
         if (newTotal > maxCartons) {
@@ -213,37 +202,59 @@ export const update = async (req: Request, res: Response): Promise<void> => {
             return;
         }
 
-        // Use a transaction for consistency
         await sequelize.transaction(async (t) => {
-            // 1) Validate and update or create each detail row using codeId when available
+            const codeChanges: Map<string, { oldCode: string; newCode: string; ItemId: number; PIId: number }> = new Map();
+
             await Promise.all(
                 data.map(async (detail) => {
-                    const { codeId, ItemId, PRSGId, value } = detail;
+                    const { codeId, ItemId, PRSGId, value, code: newCode } = detail;
                     
-                    // Validate the value update before proceeding
                     if (ItemId && PRSGId && value !== undefined) {
                         await validateValueUpdate(ItemId, PRSGId, Number(value), codeId, t);
                     }
                     
                     if (codeId) {
-                        // If codeId is provided, update by codeId for precise targeting
                         const existing = await CodeListModel.findOne({
                             where: { codeId },
                             transaction: t,
                         });
                         if (existing) {
+                            const oldCode = (existing as any).code;
+                            const existingItemId = (existing as any).ItemId;
+                            const existingPIId = (existing as any).PIId;
+                            
+                            if (newCode && oldCode !== newCode) {
+                                const changeKey = `${existingPIId}_${existingItemId}_${oldCode}`;
+                                codeChanges.set(changeKey, {
+                                    oldCode,
+                                    newCode,
+                                    ItemId: existingItemId,
+                                    PIId: existingPIId,
+                                });
+                            }
+                            
                             await existing.update(detail, { transaction: t });
                         } else {
-                            // codeId doesn't exist, create new record
                             await CodeListModel.create({ ...detail, PIId }, { transaction: t });
                         }
                     } else {
-                        // Fallback to old behavior if codeId is not provided
                         const existing = await CodeListModel.findOne({
                             where: { PIId, ItemId, PRSGId },
                             transaction: t,
                         });
                         if (existing) {
+                            const oldCode = (existing as any).code;
+                            
+                            if (newCode && oldCode !== newCode) {
+                                const changeKey = `${PIId}_${ItemId}_${oldCode}`;
+                                codeChanges.set(changeKey, {
+                                    oldCode,
+                                    newCode,
+                                    ItemId,
+                                    PIId,
+                                });
+                            }
+                            
                             await existing.update(detail, { transaction: t });
                         } else {
                             await CodeListModel.create({ ...detail, PIId }, { transaction: t });
@@ -252,27 +263,32 @@ export const update = async (req: Request, res: Response): Promise<void> => {
                 })
             );
 
-            // 2) After upsert, ensure dependent tables' codes match CodeList by PIId+ItemId
-            const rows: any[] = await sequelize.query(
-                `SELECT ItemId, MAX(code) as code FROM tbl_code_list WHERE PIId = :PIId GROUP BY ItemId`,
-                { replacements: { PIId }, type: QueryTypes.SELECT, transaction: t as any }
-            );
-
-            await Promise.all(rows.map(async (row: any) => {
-                const itemId = row.ItemId;
-                const newCode = row.code;
-                // Update only rows where code differs for this PIId+ItemId
+            for (const change of codeChanges.values()) {
                 await Promise.all([
                     TraceAbilityModel.update(
-                        { code: newCode },
-                        { where: { PIId, ItemId: itemId, code: { [Op.ne]: newCode } }, transaction: t }
+                        { code: change.newCode },
+                        { 
+                            where: { 
+                                PIId: change.PIId, 
+                                ItemId: change.ItemId, 
+                                code: change.oldCode 
+                            }, 
+                            transaction: t 
+                        }
                     ),
                     BARModel.update(
-                        { code: newCode },
-                        { where: { PIId, ItemId: itemId, code: { [Op.ne]: newCode } }, transaction: t }
+                        { code: change.newCode },
+                        { 
+                            where: { 
+                                PIId: change.PIId, 
+                                ItemId: change.ItemId, 
+                                code: change.oldCode 
+                            }, 
+                            transaction: t 
+                        }
                     )
                 ]);
-            }));
+            }
         });
 
         const results = await getItem(PIId);
@@ -280,7 +296,6 @@ export const update = async (req: Request, res: Response): Promise<void> => {
     } catch (e) {
         console.log(JSON.stringify(e), 'error');
         
-        // Check if it's a validation error and format it properly
         if (e instanceof Error && e.message.includes('Cannot update code list entry')) {
             res.status(400).send({ 
                 error: 'Validation Error',
@@ -298,27 +313,103 @@ export const update = async (req: Request, res: Response): Promise<void> => {
 };
 
 export const remove = async (req: Request, res: Response): Promise<void> => {
-    const { id } = req.params; // PIId or codeId
+    const { id } = req.params;
     const { itemId, code, codeId } = req.query;
 
     try {
         let deletedCount = 0;
 
-        if (codeId) {
-            // If codeId is provided, delete by codeId for precise targeting
-            deletedCount = await CodeListModel.destroy({
-                where: { codeId },
-            });
-        } else {
-            // Fallback to old behavior using PIId and optional filters
-            deletedCount = await CodeListModel.destroy({
-                where: {
+        await sequelize.transaction(async (t) => {
+            if (codeId) {
+                const codeListEntry = await CodeListModel.findOne({
+                    where: { codeId },
+                    transaction: t,
+                });
+
+                if (codeListEntry) {
+                    const entryCode = (codeListEntry as any).code;
+                    const entryPIId = (codeListEntry as any).PIId;
+                    const entryItemId = (codeListEntry as any).ItemId;
+
+                    deletedCount = await CodeListModel.destroy({
+                        where: { codeId },
+                        transaction: t,
+                    });
+
+                    const remainingEntries = await CodeListModel.count({
+                        where: {
+                            PIId: entryPIId,
+                            ItemId: entryItemId,
+                            code: entryCode,
+                        },
+                        transaction: t,
+                    });
+
+                    if (remainingEntries === 0) {
+                        await TraceAbilityModel.destroy({
+                            where: {
+                                PIId: entryPIId,
+                                ItemId: entryItemId,
+                                code: entryCode,
+                            },
+                            transaction: t,
+                        });
+                    }
+                }
+            } else {
+                const whereClause: any = {
                     PIId: id,
                     ...(itemId ? { ItemId: itemId } : {}),
                     ...(code ? { code } : {}),
-                },
-            });
-        }
+                };
+
+                const entriesToDelete = await CodeListModel.findAll({
+                    where: whereClause,
+                    attributes: ['code', 'PIId', 'ItemId'],
+                    transaction: t,
+                });
+
+                deletedCount = await CodeListModel.destroy({
+                    where: whereClause,
+                    transaction: t,
+                });
+
+                const codeGroups = new Map<string, { PIId: number; ItemId: number; code: string }>();
+                
+                entriesToDelete.forEach((entry: any) => {
+                    const key = `${entry.PIId}_${entry.ItemId}_${entry.code}`;
+                    if (!codeGroups.has(key)) {
+                        codeGroups.set(key, {
+                            PIId: entry.PIId,
+                            ItemId: entry.ItemId,
+                            code: entry.code,
+                        });
+                    }
+                });
+
+                for (const group of codeGroups.values()) {
+                    const remainingEntries = await CodeListModel.count({
+                        where: {
+                            PIId: group.PIId,
+                            ItemId: group.ItemId,
+                            code: group.code,
+                        },
+                        transaction: t,
+                    });
+
+                    if (remainingEntries === 0) {
+                        await TraceAbilityModel.destroy({
+                            where: {
+                                PIId: group.PIId,
+                                ItemId: group.ItemId,
+                                code: group.code,
+                            },
+                            transaction: t,
+                        });
+                    }
+                }
+            }
+        });
 
         if (deletedCount > 0) {
             res.status(200).send({ message: "Deleted successfully" });
@@ -326,6 +417,7 @@ export const remove = async (req: Request, res: Response): Promise<void> => {
             res.status(404).send({ error: "No record found" });
         }
     } catch (e) {
+        console.error('Error deleting codelist:', e);
         res.status(500).send(e);
     }
 };
@@ -358,22 +450,18 @@ export const checkCode = async (req: Request, res: Response): Promise<void> => {
             return;
         }
 
-        // Build the where clause
         const whereClause: any = {
             PIId: PIId,
             code: code.trim()
         };
 
-        // If excludeId is provided, we need to exclude all codeIds that belong to the same codelist item
         if (excludeId) {
-            // First, find the codelist item that contains the excludeId
             const excludeItem = await CodeListModel.findOne({
                 where: { codeId: excludeId },
                 attributes: ['ItemId', 'code', 'farmId']
             });
 
             if (excludeItem) {
-                // Find all codeIds that belong to the same codelist item (same ItemId, code, farmId)
                 const sameCodeListItems = await CodeListModel.findAll({
                     where: {
                         ItemId: (excludeItem as any).ItemId,
@@ -383,15 +471,12 @@ export const checkCode = async (req: Request, res: Response): Promise<void> => {
                     attributes: ['codeId']
                 });
 
-                // Exclude all these codeIds from the duplicate check
                 const excludeCodeIds = sameCodeListItems.map(item => (item as any).codeId);
                 whereClause.codeId = { [Op.notIn]: excludeCodeIds };
                 
-                // Also add the ItemId and farmId to the where clause to only check within the same item and farm
                 whereClause.ItemId = (excludeItem as any).ItemId;
                 whereClause.farmId = (excludeItem as any).farmId;
             } else {
-                // Fallback: if excludeId doesn't exist, exclude just that specific codeId
                 whereClause.codeId = { [Op.ne]: excludeId };
             }
         }
@@ -463,8 +548,8 @@ const groupCodeListByItemId = (codeList: any[]) => {
         if (!grouped[key]) {
             grouped[key] = {
                 ItemId: item.ItemId,
-                productCode: item.ItemId, // Use ItemId as productCode to match ThemedPicker value
-                productName: `${item.PRSName || ''} ${item.PRSTName || ''}`.trim(), // Keep the name for display
+                productCode: item.ItemId,
+                productName: `${item.PRSName || ''} ${item.PRSTName || ''}`.trim(),
                 code: item.code,
                 farmId: item.farmId,
                 farmName: item.farmName,
