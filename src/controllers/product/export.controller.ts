@@ -5,6 +5,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as Handlebars from 'handlebars';
 import { format } from "date-fns";
+import * as phantomjs from 'phantomjs-prebuilt';
 
 import sequelize from '../../config/sequelize';
 import { amount2word } from '../../common/utils';
@@ -372,7 +373,9 @@ const generatePDF = (templatePath: string, data: any): Promise<{ success: boolea
     const html = template(data);
 
     return new Promise((resolve, reject) => {
-        pdf.create(html).toBuffer((err: any, buffer: Buffer) => {
+        pdf.create(html, {
+            phantomPath: phantomjs.path
+        }).toBuffer((err: any, buffer: Buffer) => {
             if (err) {
                 console.error('PDF generation error:', err);
                 return resolve({ success: false });
