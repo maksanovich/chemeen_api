@@ -1,11 +1,10 @@
 import { Request, Response } from 'express';
 import { QueryTypes } from 'sequelize';
-import * as pdf from 'html-pdf';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as Handlebars from 'handlebars';
 import { format } from "date-fns";
-const phantomjs = require('phantomjs-prebuilt');
+import puppeteer from 'puppeteer';
 
 import sequelize from '../../config/sequelize';
 import { amount2word } from '../../common/utils';
@@ -353,7 +352,7 @@ export const exportAllPDFs = async (req: Request, res: Response): Promise<void> 
     }
 }
 
-const generatePDF = (templatePath: string, data: any): Promise<{ success: boolean; data?: Buffer }> => {
+const generatePDF = async (templatePath: string, data: any): Promise<{ success: boolean; data?: Buffer }> => {
     const htmlTemplate = fs.readFileSync(templatePath, 'utf8');
 
     Handlebars.registerHelper('times', function (n: number, block: any) {
@@ -369,32 +368,35 @@ const generatePDF = (templatePath: string, data: any): Promise<{ success: boolea
     });
 
     const template = Handlebars.compile(htmlTemplate);
-
     const html = template(data);
 
-    return new Promise((resolve, reject) => {
-        // Get PhantomJS binary path
-        let phantomPath: string;
-        try {
-            phantomPath = phantomjs.path;
-        } catch (e) {
-            // Fallback: construct path manually
-            const phantomjsModulePath = require.resolve('phantomjs-prebuilt');
-            const phantomjsDir = path.dirname(phantomjsModulePath);
-            phantomPath = path.join(phantomjsDir, 'bin', 'phantomjs');
-        }
-        
-        pdf.create(html, {
-            phantomPath: phantomPath
-        }).toBuffer((err: any, buffer: Buffer) => {
-            if (err) {
-                console.error('PDF generation error:', err);
-                console.error('PhantomJS path used:', phantomPath);
-                return resolve({ success: false });
-            }
-            resolve({ success: true, data: buffer });
+    try {
+        const browser = await puppeteer.launch({
+            headless: true,
+            args: ['--no-sandbox', '--disable-setuid-sandbox']
         });
-    });
+        
+        const page = await browser.newPage();
+        await page.setContent(html, { waitUntil: 'networkidle0' });
+        
+        const pdfBuffer = await page.pdf({
+            format: 'A4',
+            printBackground: true,
+            margin: {
+                top: '10mm',
+                right: '10mm',
+                bottom: '10mm',
+                left: '10mm'
+            }
+        });
+        
+        await browser.close();
+        
+        return { success: true, data: pdfBuffer };
+    } catch (err: any) {
+        console.error('PDF generation error:', err);
+        return { success: false };
+    }
 };
 
 const generatePIPDF = async (id: string): Promise<{ success: boolean; data?: Buffer }> => {
