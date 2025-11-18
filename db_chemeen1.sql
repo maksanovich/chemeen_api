@@ -1,7 +1,7 @@
 /*
  Navicat Premium Dump SQL
 
- Source Server         : localhost_3306
+ Source Server         : MySQL
  Source Server Type    : MySQL
  Source Server Version : 100432 (10.4.32-MariaDB)
  Source Host           : localhost:3306
@@ -11,7 +11,7 @@
  Target Server Version : 100432 (10.4.32-MariaDB)
  File Encoding         : 65001
 
- Date: 13/11/2025 05:10:27
+ Date: 14/10/2025 05:38:29
 */
 
 SET NAMES utf8mb4;
@@ -73,7 +73,7 @@ CREATE TABLE `tbl_bar`  (
   PRIMARY KEY (`BARId`) USING BTREE,
   INDEX `PIId`(`PIId` ASC) USING BTREE,
   CONSTRAINT `tbl_bar_ibfk_1` FOREIGN KEY (`PIId`) REFERENCES `tbl_pi` (`PIId`) ON DELETE NO ACTION ON UPDATE CASCADE
-) ENGINE = InnoDB AUTO_INCREMENT = 78 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 12 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of tbl_bar
@@ -86,21 +86,7 @@ INSERT INTO `tbl_bar` VALUES (5, 12, 'AAA01', 13, '2025-09-12', '2025-09-12', '1
 INSERT INTO `tbl_bar` VALUES (6, 13, 'CL03', 15, '2025-09-26', '2025-09-30', '45000', 'Nil', 'Nil', 'Absent', 'Absent', 'Absent', 'Absent', '2025-09-27 02:47:17', '2025-09-28 15:44:32');
 INSERT INTO `tbl_bar` VALUES (7, 13, 'CL01', 15, '2025-09-18', '2025-09-26', '12000', 'Nil', 'Nil', 'Absent', 'Absent', 'Absent', 'Absent', '2025-09-27 02:47:17', '2025-09-28 15:44:32');
 INSERT INTO `tbl_bar` VALUES (8, 13, 'CL03', 16, '2025-09-25', '2025-09-30', '47000', 'Nil', 'Nil', 'Absent', 'Absent', 'Absent', 'Absent', '2025-09-28 15:44:32', '2025-09-28 15:44:32');
-INSERT INTO `tbl_bar` VALUES (42, 21, 'C3', 82, '2025-10-26', '2025-10-27', '12', 'Nil', 'Nil', 'Absent', 'Absent', 'Absent', 'Absent', '2025-10-24 19:52:31', '2025-10-24 21:05:11');
-INSERT INTO `tbl_bar` VALUES (44, 21, 'C4', 83, '2025-10-25', '2025-10-26', '121', 'Nil', 'Nil', 'Absent', 'Absent', 'Absent', 'Absent', '2025-10-24 20:16:20', '2025-10-24 21:05:11');
-INSERT INTO `tbl_bar` VALUES (45, 21, 'C3', 82, '2025-10-25', '2025-10-26', '1233', 'Nil', 'Nil', 'Absent', 'Absent', 'Absent', 'Absent', '2025-10-24 20:16:50', '2025-10-28 08:35:20');
-INSERT INTO `tbl_bar` VALUES (46, 21, 'C3', 82, '2025-10-25', '2025-10-26', '432', 'Nil', 'Nil', 'Absent', 'Absent', 'Absent', 'Absent', '2025-10-24 20:16:50', '2025-10-28 08:35:20');
-INSERT INTO `tbl_bar` VALUES (47, 21, 'TC5', 84, '2025-10-25', '2025-10-25', '2', 'Nil', 'Nil', 'Absent', 'Absent', 'Absent', 'Absent', '2025-10-24 21:05:03', '2025-10-24 21:05:11');
-INSERT INTO `tbl_bar` VALUES (50, 22, 'tunny_code_1', 86, '2025-11-05', '2025-11-10', '20000', 'Nil', 'Nil', 'Absent', 'Absent', 'Absent', 'Absent', '2025-11-05 11:35:22', '2025-11-07 21:00:09');
-INSERT INTO `tbl_bar` VALUES (51, 22, 'tunny_code_2', 86, '2025-11-05', '2025-11-09', '32000', 'Nil', 'Nil', 'Absent', 'Absent', 'Absent', 'Absent', '2025-11-05 11:35:22', '2025-11-07 21:00:09');
-INSERT INTO `tbl_bar` VALUES (52, 22, 'tunny_code_3', 86, '2025-11-05', '2025-11-10', '2500', 'Nil', 'Nil', 'Absent', 'Absent', 'Absent', 'Absent', '2025-11-05 11:35:22', '2025-11-07 21:00:09');
-INSERT INTO `tbl_bar` VALUES (53, 22, 'shrimp_test_1', 87, '2025-11-05', '2025-11-07', '1800', 'Nil', 'Nil', 'Absent', 'Absent', 'Absent', 'Absent', '2025-11-05 11:46:06', '2025-11-07 21:00:09');
-INSERT INTO `tbl_bar` VALUES (54, 22, 'shrimp_test_2', 87, '2025-11-05', '2025-11-10', '2300', 'Nil', 'Nil', 'Absent', 'Absent', 'Absent', 'Absent', '2025-11-05 11:46:26', '2025-11-07 21:00:09');
-INSERT INTO `tbl_bar` VALUES (70, 23, 'C-TUNA-1', 89, '2025-11-09', '2025-11-09', '1', 'Nil', 'Nil', 'Absent', 'Absent', 'Absent', 'Absent', '2025-11-09 09:07:00', '2025-11-09 09:54:54');
-INSERT INTO `tbl_bar` VALUES (72, 23, 'C-COD-2', 90, '2025-11-09', '2025-11-09', '2', 'Nil', 'Nil', 'Absent', 'Absent', 'Absent', 'Absent', '2025-11-09 09:09:35', '2025-11-09 09:54:54');
-INSERT INTO `tbl_bar` VALUES (74, 23, 'C-COD-3', 90, '2025-11-09', '2025-11-09', '3', 'Nil', 'Nil', 'Absent', 'Absent', 'Absent', 'Absent', '2025-11-09 09:19:22', '2025-11-09 09:54:54');
-INSERT INTO `tbl_bar` VALUES (76, 23, 'C-COD-1', 90, '2025-11-09', '2025-11-09', '4', 'Nil', 'Nil', 'Absent', 'Absent', 'Absent', 'Absent', '2025-11-09 09:51:23', '2025-11-09 09:54:54');
-INSERT INTO `tbl_bar` VALUES (77, 23, 'C-TUNA-2', 89, '2025-11-09', '2025-11-09', '5', 'Nil', 'Nil', 'Absent', 'Absent', 'Absent', 'Absent', '2025-11-09 09:54:40', '2025-11-09 09:54:54');
+INSERT INTO `tbl_bar` VALUES (11, 16, '3L05', 26, '2025-10-09', '2025-10-16', '1', '1', '1', '11', '1', '1', '1', '2025-10-09 03:14:28', '2025-10-09 03:14:28');
 
 -- ----------------------------
 -- Table structure for tbl_code_list
@@ -110,7 +96,7 @@ CREATE TABLE `tbl_code_list`  (
   `codeId` int NOT NULL AUTO_INCREMENT,
   `PIId` int NULL DEFAULT NULL,
   `ItemId` int NULL DEFAULT NULL,
-  `code` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  `code` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `farmId` int NULL DEFAULT NULL,
   `PRSGId` int NULL DEFAULT NULL,
   `value` int NOT NULL,
@@ -125,62 +111,51 @@ CREATE TABLE `tbl_code_list`  (
   CONSTRAINT `tbl_code_list_ibfk_2` FOREIGN KEY (`ItemId`) REFERENCES `tbl_items` (`ItemId`) ON DELETE NO ACTION ON UPDATE CASCADE,
   CONSTRAINT `tbl_code_list_ibfk_3` FOREIGN KEY (`farmId`) REFERENCES `tbl_companies` (`companyId`) ON DELETE RESTRICT ON UPDATE RESTRICT,
   CONSTRAINT `tbl_code_list_ibfk_4` FOREIGN KEY (`PRSGId`) REFERENCES `tbl_prsg` (`PRSGId`) ON DELETE NO ACTION ON UPDATE CASCADE
-) ENGINE = InnoDB AUTO_INCREMENT = 171 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 106 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of tbl_code_list
 -- ----------------------------
-INSERT INTO `tbl_code_list` VALUES (19, 21, 82, 'C1', 1, 17, 1, '2025-10-24 19:37:55', '2025-10-24 20:01:04');
-INSERT INTO `tbl_code_list` VALUES (20, 21, 82, 'C1', 1, 7, 22, '2025-10-24 19:37:55', '2025-10-24 19:58:32');
-INSERT INTO `tbl_code_list` VALUES (21, 21, 82, 'C2', 1, 16, 0, '2025-10-24 19:37:55', '2025-10-24 20:01:47');
-INSERT INTO `tbl_code_list` VALUES (22, 21, 82, 'C1', 1, 6, 1, '2025-10-24 19:37:55', '2025-10-24 19:37:55');
-INSERT INTO `tbl_code_list` VALUES (23, 21, 82, 'C1', 1, 12, 34, '2025-10-24 19:37:55', '2025-10-24 19:37:55');
-INSERT INTO `tbl_code_list` VALUES (24, 21, 82, 'C1', 1, 11, 20, '2025-10-24 19:37:55', '2025-10-24 19:37:55');
-INSERT INTO `tbl_code_list` VALUES (35, 21, 82, 'C2', 1, 17, 9, '2025-10-24 19:39:38', '2025-10-24 20:13:34');
-INSERT INTO `tbl_code_list` VALUES (36, 21, 82, 'C2', 1, 7, 3, '2025-10-24 19:39:38', '2025-10-28 08:35:20');
-INSERT INTO `tbl_code_list` VALUES (41, 21, 82, 'C3', 1, 17, 1, '2025-10-24 20:09:22', '2025-10-24 20:09:22');
-INSERT INTO `tbl_code_list` VALUES (42, 21, 82, 'C3', 1, 7, 0, '2025-10-24 20:09:22', '2025-10-24 20:09:22');
-INSERT INTO `tbl_code_list` VALUES (43, 21, 82, 'C3', 1, 16, 0, '2025-10-24 20:09:22', '2025-10-24 20:09:22');
-INSERT INTO `tbl_code_list` VALUES (44, 21, 82, 'C3', 1, 6, 0, '2025-10-24 20:09:22', '2025-10-24 20:09:22');
-INSERT INTO `tbl_code_list` VALUES (45, 21, 82, 'C3', 1, 12, 0, '2025-10-24 20:09:22', '2025-10-24 20:09:22');
-INSERT INTO `tbl_code_list` VALUES (46, 21, 82, 'C3', 1, 11, 0, '2025-10-24 20:09:22', '2025-10-24 20:09:22');
-INSERT INTO `tbl_code_list` VALUES (47, 21, 83, 'C4', 1, 4, 32, '2025-10-24 20:14:45', '2025-10-24 20:14:45');
-INSERT INTO `tbl_code_list` VALUES (48, 21, 83, 'C4', 1, 3, 5323, '2025-10-24 20:14:45', '2025-10-24 20:14:45');
-INSERT INTO `tbl_code_list` VALUES (49, 21, 83, 'C4', 1, 1, 432, '2025-10-24 20:14:45', '2025-10-24 20:14:45');
-INSERT INTO `tbl_code_list` VALUES (66, 22, 86, 'tunny_code_1', 15, 17, 1, '2025-11-05 10:53:31', '2025-11-07 20:08:07');
-INSERT INTO `tbl_code_list` VALUES (67, 22, 86, 'tunny_code_1', 15, 12, 200, '2025-11-05 10:53:31', '2025-11-07 20:08:07');
-INSERT INTO `tbl_code_list` VALUES (68, 22, 86, 'tunny_code_1', 15, 16, 300, '2025-11-05 10:53:31', '2025-11-07 20:08:07');
-INSERT INTO `tbl_code_list` VALUES (69, 22, 86, 'tunny_code_1', 15, 11, 300, '2025-11-05 10:53:31', '2025-11-07 20:08:07');
-INSERT INTO `tbl_code_list` VALUES (70, 22, 86, 'tunny_code_1', 15, 6, 1200, '2025-11-05 10:53:31', '2025-11-07 20:08:07');
-INSERT INTO `tbl_code_list` VALUES (71, 22, 86, 'tunny_code_2', 14, 17, 200, '2025-11-05 10:54:08', '2025-11-05 11:43:02');
-INSERT INTO `tbl_code_list` VALUES (72, 22, 86, 'tunny_code_2', 14, 12, 100, '2025-11-05 10:54:08', '2025-11-05 11:43:02');
-INSERT INTO `tbl_code_list` VALUES (73, 22, 86, 'tunny_code_2', 14, 16, 100, '2025-11-05 10:54:08', '2025-11-05 11:43:02');
-INSERT INTO `tbl_code_list` VALUES (74, 22, 86, 'tunny_code_2', 14, 11, 100, '2025-11-05 10:54:08', '2025-11-05 11:43:02');
-INSERT INTO `tbl_code_list` VALUES (75, 22, 86, 'tunny_code_2', 14, 6, 100, '2025-11-05 10:54:08', '2025-11-05 11:43:02');
-INSERT INTO `tbl_code_list` VALUES (81, 22, 87, 'shrimp_test_1', 14, 20, 1500, '2025-11-05 11:41:23', '2025-11-05 11:41:23');
-INSERT INTO `tbl_code_list` VALUES (82, 22, 87, 'shrimp_test_1', 14, 19, 1000, '2025-11-05 11:41:23', '2025-11-05 11:41:23');
-INSERT INTO `tbl_code_list` VALUES (83, 22, 87, 'shrimp_test_2', 1, 20, 1000, '2025-11-05 11:41:49', '2025-11-05 11:44:42');
-INSERT INTO `tbl_code_list` VALUES (84, 22, 87, 'shrimp_test_2', 1, 19, 200, '2025-11-05 11:41:49', '2025-11-05 11:44:42');
-INSERT INTO `tbl_code_list` VALUES (85, 22, 86, 'tunny_code_3', 1, 16, 100, '2025-11-07 20:07:40', '2025-11-07 20:07:56');
-INSERT INTO `tbl_code_list` VALUES (86, 22, 86, 'tunny_code_3', 1, 11, 100, '2025-11-07 20:07:40', '2025-11-07 20:07:56');
-INSERT INTO `tbl_code_list` VALUES (87, 22, 86, 'tunny_code_3', 1, 6, 100, '2025-11-07 20:07:40', '2025-11-07 20:07:56');
-INSERT INTO `tbl_code_list` VALUES (142, 23, 89, 'C-TUNA-1', 1, 16, 1000, '2025-11-09 09:04:50', '2025-11-09 09:52:23');
-INSERT INTO `tbl_code_list` VALUES (143, 23, 89, 'C-TUNA-1', 1, 12, 200, '2025-11-09 09:04:50', '2025-11-09 09:52:23');
-INSERT INTO `tbl_code_list` VALUES (144, 23, 89, 'C-TUNA-1', 1, 11, 2550, '2025-11-09 09:04:50', '2025-11-09 09:52:23');
-INSERT INTO `tbl_code_list` VALUES (145, 23, 89, 'C-TUNA-1', 1, 7, 355000, '2025-11-09 09:04:50', '2025-11-09 09:52:23');
-INSERT INTO `tbl_code_list` VALUES (146, 23, 89, 'C-TUNA-1', 1, 17, 320, '2025-11-09 09:04:50', '2025-11-09 09:52:23');
-INSERT INTO `tbl_code_list` VALUES (147, 23, 89, 'C-TUNA-1', 1, 6, 2150, '2025-11-09 09:04:50', '2025-11-09 09:52:23');
-INSERT INTO `tbl_code_list` VALUES (152, 23, 90, 'C-COD-2', 1, 4, 44778, '2025-11-09 09:08:56', '2025-11-09 09:16:50');
-INSERT INTO `tbl_code_list` VALUES (156, 23, 90, 'C-COD-3', 1, 4, 5000, '2025-11-09 09:18:17', '2025-11-09 09:52:03');
-INSERT INTO `tbl_code_list` VALUES (157, 23, 90, 'C-COD-3', 1, 3, 60000, '2025-11-09 09:18:17', '2025-11-09 09:52:03');
-INSERT INTO `tbl_code_list` VALUES (163, 23, 90, 'C-COD-1', 1, 4, 222, '2025-11-09 09:50:48', '2025-11-09 09:54:03');
-INSERT INTO `tbl_code_list` VALUES (164, 23, 90, 'C-COD-1', 1, 3, 2000, '2025-11-09 09:50:48', '2025-11-09 09:54:03');
-INSERT INTO `tbl_code_list` VALUES (165, 23, 90, 'C-COD-1', 1, 1, 37000, '2025-11-09 09:50:48', '2025-11-09 09:54:03');
-INSERT INTO `tbl_code_list` VALUES (166, 23, 89, 'C-TUNA-2', 1, 16, 1530, '2025-11-09 09:53:00', '2025-11-09 09:53:00');
-INSERT INTO `tbl_code_list` VALUES (167, 23, 89, 'C-TUNA-2', 1, 12, 35000, '2025-11-09 09:53:00', '2025-11-09 09:53:00');
-INSERT INTO `tbl_code_list` VALUES (168, 23, 89, 'C-TUNA-2', 1, 11, 200, '2025-11-09 09:53:00', '2025-11-09 09:53:00');
-INSERT INTO `tbl_code_list` VALUES (169, 23, 89, 'C-TUNA-2', 1, 17, 55000, '2025-11-09 09:53:00', '2025-11-09 09:53:00');
-INSERT INTO `tbl_code_list` VALUES (170, 23, 89, 'C-TUNA-2', 1, 6, 2100, '2025-11-09 09:53:00', '2025-11-09 09:53:00');
+INSERT INTO `tbl_code_list` VALUES (45, 8, 1, '3L05', 15, 27, 1, '2025-09-10 06:07:39', '2025-09-10 06:07:39');
+INSERT INTO `tbl_code_list` VALUES (46, 8, 1, '3L05', 15, 25, 1, '2025-09-10 06:07:39', '2025-09-10 06:07:39');
+INSERT INTO `tbl_code_list` VALUES (47, 8, 1, '3L05', 15, 26, 1, '2025-09-10 06:07:39', '2025-09-10 06:07:39');
+INSERT INTO `tbl_code_list` VALUES (51, 9, 10, 'LOSA12', 1, 18, 10, '2025-09-10 07:00:24', '2025-09-10 07:00:46');
+INSERT INTO `tbl_code_list` VALUES (52, 9, 10, 'LOSA12', 1, 15, 10, '2025-09-10 07:00:24', '2025-09-10 07:00:46');
+INSERT INTO `tbl_code_list` VALUES (53, 9, 10, 'LOSA12', 1, 14, 2, '2025-09-10 07:00:24', '2025-09-10 07:00:46');
+INSERT INTO `tbl_code_list` VALUES (57, 9, 10, 'LSO', 14, 18, 10, '2025-09-10 07:09:00', '2025-09-10 07:09:00');
+INSERT INTO `tbl_code_list` VALUES (58, 9, 10, 'LSO', 14, 15, 10, '2025-09-10 07:09:00', '2025-09-10 07:09:00');
+INSERT INTO `tbl_code_list` VALUES (59, 9, 10, 'LSO', 14, 14, 2, '2025-09-10 07:09:00', '2025-09-10 07:09:00');
+INSERT INTO `tbl_code_list` VALUES (60, 11, 11, 'PSO', 15, 27, 1, '2025-09-10 19:03:53', '2025-09-10 19:03:53');
+INSERT INTO `tbl_code_list` VALUES (61, 11, 11, 'PSO', 15, 25, 4, '2025-09-10 19:03:53', '2025-09-10 19:03:53');
+INSERT INTO `tbl_code_list` VALUES (62, 11, 11, 'PSO', 15, 26, 20, '2025-09-10 19:03:53', '2025-09-10 19:03:53');
+INSERT INTO `tbl_code_list` VALUES (63, 11, 12, 'SLE', 14, 22, 1, '2025-09-10 21:12:13', '2025-09-10 21:12:13');
+INSERT INTO `tbl_code_list` VALUES (64, 11, 12, 'SLE', 14, 21, 2, '2025-09-10 21:12:13', '2025-09-10 21:12:13');
+INSERT INTO `tbl_code_list` VALUES (65, 12, 13, 'AAA01', 15, 27, 30, '2025-09-11 01:41:58', '2025-09-11 01:41:58');
+INSERT INTO `tbl_code_list` VALUES (66, 12, 13, 'AAA01', 15, 26, 30, '2025-09-11 01:41:58', '2025-09-11 01:41:58');
+INSERT INTO `tbl_code_list` VALUES (67, 12, 13, 'AAA01', 15, 25, 40, '2025-09-11 01:41:58', '2025-09-11 01:41:58');
+INSERT INTO `tbl_code_list` VALUES (68, 12, 14, 'AAA04', 14, 24, 10, '2025-09-11 01:50:33', '2025-09-11 01:50:33');
+INSERT INTO `tbl_code_list` VALUES (69, 12, 14, 'AAA04', 14, 23, 90, '2025-09-11 01:50:33', '2025-09-11 01:50:33');
+INSERT INTO `tbl_code_list` VALUES (70, 13, 15, 'CL01', 15, 24, 10, '2025-09-24 06:54:42', '2025-09-24 06:54:42');
+INSERT INTO `tbl_code_list` VALUES (71, 13, 15, 'CL01', 15, 23, 15, '2025-09-24 06:54:42', '2025-09-24 06:54:42');
+INSERT INTO `tbl_code_list` VALUES (72, 13, 16, 'CL03', 14, 3, 12, '2025-09-24 06:55:07', '2025-09-24 06:55:07');
+INSERT INTO `tbl_code_list` VALUES (73, 13, 16, 'CL03', 14, 4, 15, '2025-09-24 06:55:07', '2025-09-24 06:55:07');
+INSERT INTO `tbl_code_list` VALUES (74, 13, 16, 'CL03', 14, 1, 3, '2025-09-24 06:55:07', '2025-09-24 06:55:07');
+INSERT INTO `tbl_code_list` VALUES (75, 13, 15, 'CL03', 1, 24, 20, '2025-09-24 06:56:52', '2025-09-24 06:56:52');
+INSERT INTO `tbl_code_list` VALUES (76, 13, 15, 'CL03', 1, 23, 5, '2025-09-24 06:56:52', '2025-09-24 06:56:52');
+INSERT INTO `tbl_code_list` VALUES (81, 14, 21, 'MLA01', 1, 22, 12, '2025-10-07 05:43:49', '2025-10-07 05:43:49');
+INSERT INTO `tbl_code_list` VALUES (82, 14, 21, 'MLA01', 1, 21, 18, '2025-10-07 05:43:49', '2025-10-07 05:43:49');
+INSERT INTO `tbl_code_list` VALUES (87, 15, 24, '4G14', 15, 4, 11, '2025-10-07 07:51:20', '2025-10-07 07:51:20');
+INSERT INTO `tbl_code_list` VALUES (88, 15, 24, '4G14', 15, 3, 15, '2025-10-07 07:51:20', '2025-10-07 07:51:20');
+INSERT INTO `tbl_code_list` VALUES (89, 15, 24, '4G14', 15, 1, 4, '2025-10-07 07:51:20', '2025-10-07 07:51:20');
+INSERT INTO `tbl_code_list` VALUES (90, 15, 25, '2Fqw', 1, 22, 5, '2025-10-07 07:52:11', '2025-10-07 07:52:11');
+INSERT INTO `tbl_code_list` VALUES (91, 15, 25, '2Fqw', 1, 21, 6, '2025-10-07 07:52:11', '2025-10-07 07:52:11');
+INSERT INTO `tbl_code_list` VALUES (92, 16, 26, '3L05', 1, 24, 12, '2025-10-07 07:54:27', '2025-10-07 07:54:27');
+INSERT INTO `tbl_code_list` VALUES (93, 16, 26, '3L05', 1, 23, 18, '2025-10-07 07:54:27', '2025-10-08 07:07:24');
+INSERT INTO `tbl_code_list` VALUES (101, 16, 48, '3MLS', 1, 24, 10, '2025-10-09 01:28:03', '2025-10-09 01:28:03');
+INSERT INTO `tbl_code_list` VALUES (102, 16, 48, '3MLS', 1, 23, 14, '2025-10-09 01:28:03', '2025-10-09 01:28:03');
+INSERT INTO `tbl_code_list` VALUES (103, 16, 49, 'LMA', 1, 27, 4, '2025-10-09 01:28:28', '2025-10-09 01:28:28');
+INSERT INTO `tbl_code_list` VALUES (104, 16, 49, 'LMA', 1, 26, 5, '2025-10-09 01:28:28', '2025-10-09 01:28:28');
+INSERT INTO `tbl_code_list` VALUES (105, 16, 49, 'LMA', 1, 25, 6, '2025-10-09 01:28:28', '2025-10-09 01:28:28');
 
 -- ----------------------------
 -- Table structure for tbl_companies
@@ -252,7 +227,7 @@ CREATE TABLE `tbl_elisa`  (
   PRIMARY KEY (`elisaId`) USING BTREE,
   INDEX `PIId`(`PIId` ASC) USING BTREE,
   CONSTRAINT `tbl_elisa_ibfk_1` FOREIGN KEY (`PIId`) REFERENCES `tbl_pi` (`PIId`) ON DELETE NO ACTION ON UPDATE CASCADE
-) ENGINE = InnoDB AUTO_INCREMENT = 9 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of tbl_elisa
@@ -281,7 +256,7 @@ CREATE TABLE `tbl_elisa_detail`  (
   CONSTRAINT `tbl_elisa_detail_ibfk_1` FOREIGN KEY (`PIId`) REFERENCES `tbl_pi` (`PIId`) ON DELETE NO ACTION ON UPDATE CASCADE,
   CONSTRAINT `tbl_elisa_detail_ibfk_2` FOREIGN KEY (`elisaId`) REFERENCES `tbl_elisa` (`elisaId`) ON DELETE NO ACTION ON UPDATE CASCADE,
   CONSTRAINT `tbl_elisa_detail_ibfk_3` FOREIGN KEY (`testId`) REFERENCES `tbl_test` (`testId`) ON DELETE NO ACTION ON UPDATE CASCADE
-) ENGINE = InnoDB AUTO_INCREMENT = 46 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 16 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of tbl_elisa_detail
@@ -296,31 +271,6 @@ INSERT INTO `tbl_elisa_detail` VALUES (12, 12, 2, 2, 'ELISA', '2', '', '2025-09-
 INSERT INTO `tbl_elisa_detail` VALUES (13, 12, 2, 3, 'ELISA', '22', '', '2025-09-11 04:44:34', '2025-09-11 04:44:34');
 INSERT INTO `tbl_elisa_detail` VALUES (14, 12, 2, 4, 'ELISA', '2', '', '2025-09-11 04:44:34', '2025-09-11 04:44:34');
 INSERT INTO `tbl_elisa_detail` VALUES (15, 12, 2, 5, 'ELISA', '2', '', '2025-09-11 04:44:34', '2025-09-11 04:44:34');
-
--- ----------------------------
--- Table structure for tbl_elisa_pdf
--- ----------------------------
-DROP TABLE IF EXISTS `tbl_elisa_pdf`;
-CREATE TABLE `tbl_elisa_pdf`  (
-  `pdfId` int NOT NULL AUTO_INCREMENT,
-  `PIId` int NOT NULL,
-  `pdfName` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `fileName` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `filePath` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `fileSize` int NOT NULL,
-  `uploadDate` datetime NOT NULL,
-  `createdAt` datetime NOT NULL,
-  `updatedAt` datetime NOT NULL,
-  PRIMARY KEY (`pdfId`) USING BTREE,
-  UNIQUE INDEX `fileName`(`fileName` ASC) USING BTREE,
-  INDEX `PIId`(`PIId` ASC) USING BTREE,
-  CONSTRAINT `tbl_elisa_pdf_ibfk_1` FOREIGN KEY (`PIId`) REFERENCES `tbl_pi` (`PIId`) ON DELETE NO ACTION ON UPDATE CASCADE
-) ENGINE = InnoDB AUTO_INCREMENT = 8 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
-
--- ----------------------------
--- Records of tbl_elisa_pdf
--- ----------------------------
-INSERT INTO `tbl_elisa_pdf` VALUES (6, 22, 'Bacteriological-SMLW-002-2025-09-28 - 5T21 - 2025-10-28', '1761644414019-Bacteriological-SMLW-002-2025-09-28.pdf', 'E:\\Dev\\chemeen\\Src\\chemeen_api\\uploads\\elisa-pdfs\\1761644414019-Bacteriological-SMLW-002-2025-09-28.pdf', 31264, '2025-10-28 09:40:14', '2025-10-28 09:40:14', '2025-10-28 09:40:14');
 
 -- ----------------------------
 -- Table structure for tbl_item_details
@@ -342,7 +292,7 @@ CREATE TABLE `tbl_item_details`  (
   INDEX `PRSGId`(`PRSGId` ASC) USING BTREE,
   CONSTRAINT `tbl_item_details_ibfk_1` FOREIGN KEY (`ItemId`) REFERENCES `tbl_items` (`ItemId`) ON DELETE NO ACTION ON UPDATE CASCADE,
   CONSTRAINT `tbl_item_details_ibfk_2` FOREIGN KEY (`PRSGId`) REFERENCES `tbl_prsg` (`PRSGId`) ON DELETE NO ACTION ON UPDATE CASCADE
-) ENGINE = InnoDB AUTO_INCREMENT = 844 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 157 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of tbl_item_details
@@ -390,43 +340,13 @@ INSERT INTO `tbl_item_details` VALUES (73, 24, 3, '26/30', '10', '100.00', '10',
 INSERT INTO `tbl_item_details` VALUES (74, 24, 1, '21/25', '10', '100.00', '15', '1500.00', '2025-10-07 07:48:28', '2025-10-07 07:48:28');
 INSERT INTO `tbl_item_details` VALUES (75, 25, 22, '61UP', '2', '24.00', '25', '600.00', '2025-10-07 07:48:58', '2025-10-07 07:48:58');
 INSERT INTO `tbl_item_details` VALUES (76, 25, 21, '41/60', '9', '108.00', '36', '3888.00', '2025-10-07 07:48:58', '2025-10-07 07:48:58');
-INSERT INTO `tbl_item_details` VALUES (365, 78, 17, '1/2', '32', '768.00', '1', '768.00', '2025-10-24 07:08:53', '2025-10-24 07:08:53');
-INSERT INTO `tbl_item_details` VALUES (366, 78, 16, 'U/1', '12', '288.00', '1', '288.00', '2025-10-24 07:08:53', '2025-10-24 07:08:53');
-INSERT INTO `tbl_item_details` VALUES (367, 78, 7, 'U/5', '', '', '1', '', '2025-10-24 07:08:53', '2025-10-24 07:08:53');
-INSERT INTO `tbl_item_details` VALUES (368, 78, 11, '10/20', '', '', '1', '', '2025-10-24 07:08:53', '2025-10-24 07:08:53');
-INSERT INTO `tbl_item_details` VALUES (369, 78, 12, '20/30', '42', '1008.00', '1', '1008.00', '2025-10-24 07:08:53', '2025-10-24 07:08:53');
-INSERT INTO `tbl_item_details` VALUES (370, 78, 6, 'U/3', '', '', '1', '', '2025-10-24 07:08:53', '2025-10-24 07:08:53');
-INSERT INTO `tbl_item_details` VALUES (757, 83, 4, '31/40', '32', '320.00', '3', '960.00', '2025-10-24 20:14:27', '2025-10-24 20:14:27');
-INSERT INTO `tbl_item_details` VALUES (758, 83, 3, '26/30', '5323', '53230.00', '5', '266150.00', '2025-10-24 20:14:27', '2025-10-24 20:14:27');
-INSERT INTO `tbl_item_details` VALUES (759, 83, 1, '21/25', '432', '4320.00', '1', '4320.00', '2025-10-24 20:14:27', '2025-10-24 20:14:27');
-INSERT INTO `tbl_item_details` VALUES (760, 82, 7, 'U/5', '50', '500.00', '7', '3500.00', '2025-10-24 20:47:56', '2025-10-24 20:47:56');
-INSERT INTO `tbl_item_details` VALUES (761, 82, 16, 'U/1', '23', '230.00', '2', '460.00', '2025-10-24 20:47:56', '2025-10-24 20:47:56');
-INSERT INTO `tbl_item_details` VALUES (762, 82, 12, '20/30', '34', '340.00', '23', '7820.00', '2025-10-24 20:47:56', '2025-10-24 20:47:56');
-INSERT INTO `tbl_item_details` VALUES (763, 82, 11, '10/20', '20', '200.00', '1', '200.00', '2025-10-24 20:47:56', '2025-10-24 20:47:56');
-INSERT INTO `tbl_item_details` VALUES (764, 82, 17, '1/2', '12', '120.00', '8', '960.00', '2025-10-24 20:47:56', '2025-10-24 20:47:56');
-INSERT INTO `tbl_item_details` VALUES (765, 82, 6, 'U/3', '1', '10.00', '1', '10.00', '2025-10-24 20:47:56', '2025-10-24 20:47:56');
-INSERT INTO `tbl_item_details` VALUES (776, 84, 8, 'U/7', '12', '24.00', '21', '504.00', '2025-10-24 21:06:44', '2025-10-24 21:06:44');
-INSERT INTO `tbl_item_details` VALUES (777, 84, 9, '8/12', '3224', '6448.00', '13', '83824.00', '2025-10-24 21:06:44', '2025-10-24 21:06:44');
-INSERT INTO `tbl_item_details` VALUES (778, 84, 5, '16/20', '23', '46.00', '1', '46.00', '2025-10-24 21:06:44', '2025-10-24 21:06:44');
-INSERT INTO `tbl_item_details` VALUES (779, 84, 10, '13/15', '12', '24.00', '12', '288.00', '2025-10-24 21:06:44', '2025-10-24 21:06:44');
-INSERT INTO `tbl_item_details` VALUES (780, 84, 2, '21/25', '12', '24.00', '1', '24.00', '2025-10-24 21:06:44', '2025-10-24 21:06:44');
-INSERT INTO `tbl_item_details` VALUES (793, 87, 20, '61UP', '2500', '25000.00', '21', '525000.00', '2025-11-05 11:40:34', '2025-11-05 11:40:34');
-INSERT INTO `tbl_item_details` VALUES (794, 87, 19, '41/60', '1200', '12000.00', '19', '228000.00', '2025-11-05 11:40:34', '2025-11-05 11:40:34');
-INSERT INTO `tbl_item_details` VALUES (795, 86, 17, '1/2', '1500', '15000.00', '12', '180000.00', '2025-11-05 11:42:25', '2025-11-05 11:42:25');
-INSERT INTO `tbl_item_details` VALUES (796, 86, 12, '20/30', '400', '4000.00', '12', '48000.00', '2025-11-05 11:42:25', '2025-11-05 11:42:25');
-INSERT INTO `tbl_item_details` VALUES (797, 86, 7, 'U/5', '', '', '1', '0.00', '2025-11-05 11:42:25', '2025-11-05 11:42:25');
-INSERT INTO `tbl_item_details` VALUES (798, 86, 16, 'U/1', '800', '8000.00', '9', '72000.00', '2025-11-05 11:42:25', '2025-11-05 11:42:25');
-INSERT INTO `tbl_item_details` VALUES (799, 86, 11, '10/20', '700', '7000.00', '9', '63000.00', '2025-11-05 11:42:25', '2025-11-05 11:42:25');
-INSERT INTO `tbl_item_details` VALUES (800, 86, 6, 'U/3', '1500', '15000.00', '8', '120000.00', '2025-11-05 11:42:25', '2025-11-05 11:42:25');
-INSERT INTO `tbl_item_details` VALUES (831, 90, 4, '31/40', '50000', '540000.00', '32', '17280000.00', '2025-11-08 08:40:59', '2025-11-08 08:40:59');
-INSERT INTO `tbl_item_details` VALUES (832, 90, 3, '26/30', '62000', '669600.00', '127', '85039200.00', '2025-11-08 08:40:59', '2025-11-08 08:40:59');
-INSERT INTO `tbl_item_details` VALUES (833, 90, 1, '21/25', '37000', '399600.00', '43', '17182800.00', '2025-11-08 08:40:59', '2025-11-08 08:40:59');
-INSERT INTO `tbl_item_details` VALUES (836, 89, 16, 'U/1', '2530', '60720.00', '34', '2064480.00', '2025-11-08 13:45:30', '2025-11-08 13:45:30');
-INSERT INTO `tbl_item_details` VALUES (837, 89, 12, '20/30', '35200', '844800.00', '24', '20275200.00', '2025-11-08 13:45:30', '2025-11-08 13:45:30');
-INSERT INTO `tbl_item_details` VALUES (838, 89, 11, '10/20', '2750', '66000.00', '34', '2244000.00', '2025-11-08 13:45:30', '2025-11-08 13:45:30');
-INSERT INTO `tbl_item_details` VALUES (839, 89, 7, 'U/5', '355000', '8520000.00', '142', '1209840000.00', '2025-11-08 13:45:30', '2025-11-08 13:45:30');
-INSERT INTO `tbl_item_details` VALUES (840, 89, 17, '1/2', '55320', '1327680.00', '21', '27881280.00', '2025-11-08 13:45:30', '2025-11-08 13:45:30');
-INSERT INTO `tbl_item_details` VALUES (841, 89, 6, 'U/3', '4250', '102000.00', '143', '14586000.00', '2025-11-08 13:45:30', '2025-11-08 13:45:30');
+INSERT INTO `tbl_item_details` VALUES (148, 48, 24, '21/25', '12', '144.00', '12', '1728.00', '2025-10-09 01:24:37', '2025-10-09 01:24:37');
+INSERT INTO `tbl_item_details` VALUES (149, 48, 23, '16/20', '12', '144.00', '12', '1728.00', '2025-10-09 01:24:37', '2025-10-09 01:24:37');
+INSERT INTO `tbl_item_details` VALUES (150, 49, 27, '700/900', '5', '25.00', '5', '125.00', '2025-10-09 01:25:03', '2025-10-09 01:25:03');
+INSERT INTO `tbl_item_details` VALUES (151, 49, 26, '900/1000', '5', '25.00', '5', '125.00', '2025-10-09 01:25:03', '2025-10-09 01:25:03');
+INSERT INTO `tbl_item_details` VALUES (152, 49, 25, '1000/UP', '5', '25.00', '5', '125.00', '2025-10-09 01:25:03', '2025-10-09 01:25:03');
+INSERT INTO `tbl_item_details` VALUES (155, 26, 24, '21/25', '15', '150.00', '15', '2250.00', '2025-10-09 01:39:28', '2025-10-09 01:39:28');
+INSERT INTO `tbl_item_details` VALUES (156, 26, 23, '16/20', '15', '150.00', '15', '2250.00', '2025-10-09 01:39:28', '2025-10-09 01:39:28');
 
 -- ----------------------------
 -- Table structure for tbl_items
@@ -459,7 +379,7 @@ CREATE TABLE `tbl_items`  (
   CONSTRAINT `tbl_items_ibfk_5` FOREIGN KEY (`PRSPId`) REFERENCES `tbl_prsp` (`PRSPId`) ON DELETE NO ACTION ON UPDATE CASCADE,
   CONSTRAINT `tbl_items_ibfk_6` FOREIGN KEY (`PRSVId`) REFERENCES `tbl_prsv` (`PRSVId`) ON DELETE NO ACTION ON UPDATE CASCADE,
   CONSTRAINT `tbl_items_ibfk_7` FOREIGN KEY (`PRSPSId`) REFERENCES `tbl_prsps` (`PRSPSId`) ON DELETE NO ACTION ON UPDATE CASCADE
-) ENGINE = InnoDB AUTO_INCREMENT = 92 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 50 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of tbl_items
@@ -480,14 +400,9 @@ INSERT INTO `tbl_items` VALUES (21, 14, 'ABC-123', 11, 23, 18, 8, 5, 13, '2025-1
 INSERT INTO `tbl_items` VALUES (22, 14, 'ROUTETEST', 11, 23, 17, 9, 4, 2, '2025-10-07 06:01:45', '2025-10-07 06:01:45');
 INSERT INTO `tbl_items` VALUES (24, 15, 'TEST MARKS', 7, 21, 12, 6, 8, 3, '2025-10-07 07:48:28', '2025-10-07 07:48:28');
 INSERT INTO `tbl_items` VALUES (25, 15, '16116', 11, 23, 18, 3, 8, 13, '2025-10-07 07:48:58', '2025-10-07 07:48:58');
-INSERT INTO `tbl_items` VALUES (78, 20, 'TEST1', 6, 14, 17, 9, 5, 9, '2025-10-24 07:08:52', '2025-10-24 07:08:52');
-INSERT INTO `tbl_items` VALUES (82, 21, 'TEST3', 6, 14, 18, 8, 3, 9, '2025-10-24 17:21:44', '2025-10-24 20:47:55');
-INSERT INTO `tbl_items` VALUES (83, 21, 'TEST3', 7, 21, 17, 6, 3, 3, '2025-10-24 20:14:27', '2025-10-24 20:14:27');
-INSERT INTO `tbl_items` VALUES (84, 21, 'TEST4', 6, 14, 18, 10, 3, 2, '2025-10-24 21:03:43', '2025-10-24 21:06:44');
-INSERT INTO `tbl_items` VALUES (86, 22, 'tunny', 6, 14, 17, 8, 3, 9, '2025-11-05 10:50:28', '2025-11-05 11:42:25');
-INSERT INTO `tbl_items` VALUES (87, 22, 'shrimp', 4, 20, 17, 8, 4, 11, '2025-11-05 11:40:34', '2025-11-05 11:40:34');
-INSERT INTO `tbl_items` VALUES (89, 23, 'Tuna-511A42D4', 11, 23, 23, 9, 12, 9, '2025-11-08 06:11:57', '2025-11-08 13:45:30');
-INSERT INTO `tbl_items` VALUES (90, 23, 'Cod', 3, 18, 4, 1, 8, 3, '2025-11-08 08:40:59', '2025-11-08 08:40:59');
+INSERT INTO `tbl_items` VALUES (26, 16, 'MARKS 1200', 11, 23, 18, 8, 6, 15, '2025-10-07 07:53:42', '2025-10-09 01:39:28');
+INSERT INTO `tbl_items` VALUES (48, 16, 'asdf', 11, 23, 18, 5, 6, 15, '2025-10-09 01:24:37', '2025-10-09 01:24:37');
+INSERT INTO `tbl_items` VALUES (49, 16, 'asdf', 4, 19, 16, 7, 5, 16, '2025-10-09 01:25:03', '2025-10-09 01:25:03');
 
 -- ----------------------------
 -- Table structure for tbl_pi
@@ -513,7 +428,7 @@ CREATE TABLE `tbl_pi`  (
   `linerNumber` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
   `createdAt` datetime NOT NULL,
   `updatedAt` datetime NOT NULL,
-  `POQuality` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `POQuality` int NULL DEFAULT NULL,
   PRIMARY KEY (`PIId`) USING BTREE,
   UNIQUE INDEX `PINo`(`PINo` ASC) USING BTREE,
   INDEX `exporterId`(`exporterId` ASC) USING BTREE,
@@ -528,7 +443,7 @@ CREATE TABLE `tbl_pi`  (
   CONSTRAINT `tbl_pi_ibfk_4` FOREIGN KEY (`bankId`) REFERENCES `tbl_banks` (`bankId`) ON DELETE NO ACTION ON UPDATE CASCADE,
   CONSTRAINT `tbl_pi_ibfk_5` FOREIGN KEY (`loadingPortId`) REFERENCES `tbl_ports` (`portId`) ON DELETE RESTRICT ON UPDATE RESTRICT,
   CONSTRAINT `tbl_pi_ibfk_6` FOREIGN KEY (`dischargePortId`) REFERENCES `tbl_ports` (`portId`) ON DELETE RESTRICT ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 25 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 18 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of tbl_pi
@@ -537,15 +452,11 @@ INSERT INTO `tbl_pi` VALUES (8, 'DPL001', '2025-09-01', 'gdt', 'PO001', NULL, NU
 INSERT INTO `tbl_pi` VALUES (9, 'MLMS001', '2025-09-09', 'gst', 'PO003', NULL, NULL, '2025-09-30T06:54:00.000Z', 4, 6, 8, 1, 'tdp', 10, 14, NULL, NULL, '2025-09-10 06:55:21', '2025-09-10 06:55:21', NULL);
 INSERT INTO `tbl_pi` VALUES (10, 'SML002', '2025-09-11', 'asdf', 'PO004', NULL, NULL, '2025-09-23T08:49:00.000Z', 12, 2, 9, 1, 'td', 5, 4, NULL, NULL, '2025-09-10 08:49:38', '2025-09-10 08:49:38', NULL);
 INSERT INTO `tbl_pi` VALUES (11, 'SML0019', '2025-09-09', 'asdf', 'asdf', NULL, NULL, '2025-09-15T08:52:00.000Z', 12, 2, 9, 2, 'sdf', 6, 5, NULL, NULL, '2025-09-10 08:59:21', '2025-09-10 09:00:07', NULL);
-INSERT INTO `tbl_pi` VALUES (12, 'SAS0092', '2025-09-09', 'asdf', 'PO9912', NULL, NULL, '2025-09-23T01:39:00.000Z', 5, 6, 13, 1, 'TDP', 8, 11, NULL, NULL, '2025-09-11 01:39:38', '2025-09-11 01:39:38', '123');
-INSERT INTO `tbl_pi` VALUES (13, 'SMLW-002', '2025-09-10', '37AAHCG5707G1ZK', 'WPE-002', NULL, NULL, '2025-09-23', 7, 6, 13, 3, '100% LC at sight, CNF, JAPAN', 10, 12, NULL, NULL, '2025-09-11 06:08:42', '2025-09-11 06:08:42', '123');
-INSERT INTO `tbl_pi` VALUES (14, 'PI-0234A12', '2025-10-06', 'GST120987', 'PO-B71N7789', NULL, NULL, '2025-10-08', 12, 2, 16, 4, 'Please refer to Terms and Conditions given...', 4, 14, NULL, NULL, '2025-10-06 14:31:36', '2025-10-06 14:31:36', '1500');
-INSERT INTO `tbl_pi` VALUES (15, 'Asd4556', '2025-10-07', '2345687667', '4555666', NULL, NULL, '2025-10-09', 12, 2, 13, 3, 'Drkdkdjdn', 14, 8, NULL, NULL, '2025-10-07 07:43:02', '2025-10-07 07:43:02', '120');
-INSERT INTO `tbl_pi` VALUES (20, 'PI/2025/001', '2025-10-19', '29AABCU9603R1Z5', 'PO-USA-2025-456', NULL, NULL, '2025-10-19', 12, 6, 16, 4, 'FOB Visakhapatnam Port - 30 Days Credit', 14, 12, NULL, NULL, '2025-10-19 04:47:59', '2025-10-19 04:47:59', '0');
-INSERT INTO `tbl_pi` VALUES (21, 'CN2312', '2025-10-21', '5678', '45677', NULL, NULL, '2025-10-23', 12, 2, 16, 3, 'Tnd payment ', 13, 8, NULL, NULL, '2025-10-21 02:14:00', '2025-10-28 08:33:28', 'fresh, frozen, clean');
-INSERT INTO `tbl_pi` VALUES (22, 'INVOICE_20251105', '2025-10-28', 'GST2121', 'PO1023', NULL, NULL, '2025-10-28', 12, 6, 10, 2, '2', 6, 3, NULL, NULL, '2025-10-28 09:36:52', '2025-11-05 12:14:11', 'FRESH');
-INSERT INTO `tbl_pi` VALUES (23, 'FINAL', '2025-11-09', 'GST5255202913', 'PO3281982122', NULL, NULL, '2025-11-09', 5, 2, 11, 3, '2', 7, 6, NULL, NULL, '2025-11-08 06:05:42', '2025-11-09 07:53:42', 'fresh, clean, tasted, colorful');
-INSERT INTO `tbl_pi` VALUES (24, 'FINAL-0101', '2025-11-12', 'GST-01', 'PO-3211', NULL, NULL, '2025-11-12', 5, 6, 8, 1, '2', 7, 13, NULL, NULL, '2025-11-12 03:01:37', '2025-11-12 03:01:53', 'PO-Q-23113');
+INSERT INTO `tbl_pi` VALUES (12, 'SAS0092', '2025-09-09', 'asdf', 'PO9912', NULL, NULL, '2025-09-23T01:39:00.000Z', 5, 6, 13, 1, 'TDP', 8, 11, NULL, NULL, '2025-09-11 01:39:38', '2025-09-11 01:39:38', 123);
+INSERT INTO `tbl_pi` VALUES (13, 'SMLW-002', '2025-09-10', '37AAHCG5707G1ZK', 'WPE-002', NULL, NULL, '2025-09-23', 7, 6, 13, 3, '100% LC at sight, CNF, JAPAN', 10, 12, NULL, NULL, '2025-09-11 06:08:42', '2025-09-11 06:08:42', 123);
+INSERT INTO `tbl_pi` VALUES (14, 'PI-0234A12', '2025-10-06', 'GST120987', 'PO-B71N7789', NULL, NULL, '2025-10-08', 12, 2, 16, 4, 'Please refer to Terms and Conditions given...', 4, 14, NULL, NULL, '2025-10-06 14:31:36', '2025-10-06 14:31:36', 1500);
+INSERT INTO `tbl_pi` VALUES (15, 'Asd4556', '2025-10-07', '2345687667', '4555666', NULL, NULL, '2025-10-09', 12, 2, 13, 3, 'Drkdkdjdn', 14, 8, NULL, NULL, '2025-10-07 07:43:02', '2025-10-07 07:43:02', 120);
+INSERT INTO `tbl_pi` VALUES (16, 'MAK-001', '2025-10-08', 'GSTIn', 'PO-0001', NULL, NULL, '2025-10-14', 12, 2, 8, 4, 'TDP', 6, 11, NULL, NULL, '2025-10-07 07:52:46', '2025-10-07 07:52:46', 120);
 
 -- ----------------------------
 -- Table structure for tbl_ports
@@ -917,20 +828,27 @@ CREATE TABLE `tbl_trace_ability`  (
   PRIMARY KEY (`traceAbilityId`) USING BTREE,
   INDEX `PIId`(`PIId` ASC) USING BTREE,
   CONSTRAINT `tbl_trace_ability_ibfk_1` FOREIGN KEY (`PIId`) REFERENCES `tbl_pi` (`PIId`) ON DELETE NO ACTION ON UPDATE CASCADE
-) ENGINE = InnoDB AUTO_INCREMENT = 363 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 33 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of tbl_trace_ability
 -- ----------------------------
-INSERT INTO `tbl_trace_ability` VALUES (306, 22, 86, '2025-11-05', '1200', '110', 'tunny_code_2', '600', '0', '4900', '2025-11-04', '2025-11-08 08:48:25', '2025-11-08 08:48:25');
-INSERT INTO `tbl_trace_ability` VALUES (307, 22, 86, '2025-11-05', '1300', '110', 'tunny_code_1', '2001', '0', '4900', '2025-11-04', '2025-11-08 08:48:25', '2025-11-08 08:48:25');
-INSERT INTO `tbl_trace_ability` VALUES (308, 22, 86, '2025-11-05', '1300', '110', 'tunny_code_3', '300', '0', '4900', '2025-11-04', '2025-11-08 08:48:25', '2025-11-08 08:48:25');
-INSERT INTO `tbl_trace_ability` VALUES (309, 22, 87, '2025-11-05', '1400', '90', 'shrimp_test_1', '2500', '0', '2000', '2025-11-04', '2025-11-08 08:48:25', '2025-11-08 08:48:25');
-INSERT INTO `tbl_trace_ability` VALUES (310, 22, 87, '2025-11-05', '1400', '90', 'shrimp_test_2', '1200', '0', '2000', '2025-11-04', '2025-11-08 08:48:25', '2025-11-08 08:48:25');
-INSERT INTO `tbl_trace_ability` VALUES (354, 23, 89, '2025-11-09', '1', '1', 'C-TUNA-1', '361550', '0', '0', '2025-11-08', '2025-11-09 09:05:16', '2025-11-09 09:53:25');
-INSERT INTO `tbl_trace_ability` VALUES (356, 23, 90, '2025-11-09', '3', '3', 'C-COD-2', '44778', '0', '0', '2025-11-08', '2025-11-09 09:09:11', '2025-11-09 09:53:25');
-INSERT INTO `tbl_trace_ability` VALUES (359, 23, 90, '2025-11-09', '2', '2', 'C-COD-3', '60222', '0', '0', '2025-11-08', '2025-11-09 09:18:43', '2025-11-09 09:53:25');
-INSERT INTO `tbl_trace_ability` VALUES (361, 23, 90, '2025-11-09', '3', '3', 'C-COD-1', '39222', '0', '0', '2025-11-08', '2025-11-09 09:51:05', '2025-11-09 09:54:03');
-INSERT INTO `tbl_trace_ability` VALUES (362, 23, 89, '2025-11-09', '2', '2', 'C-TUNA-2', '93830', '0', '0', '2025-11-08', '2025-11-09 09:53:25', '2025-11-09 09:53:25');
+INSERT INTO `tbl_trace_ability` VALUES (10, 8, 1, '2025-09-16T09:32:00.000Z', '1', '20', '3L04', '0', '10', '2', '2025-09-15', '2025-09-10 06:08:36', '2025-09-10 06:08:36');
+INSERT INTO `tbl_trace_ability` VALUES (11, 8, 3, '2025-09-23T09:32:00.000Z', '20', '10', '3L04', '0', '230', '1', '2025-09-22', '2025-09-10 06:08:36', '2025-09-10 06:08:36');
+INSERT INTO `tbl_trace_ability` VALUES (12, 8, 2, '2025-09-30T09:32:00.000Z', '2', '10', '3L05', '0', '4', '0', '2025-09-29', '2025-09-10 06:08:36', '2025-09-10 06:08:36');
+INSERT INTO `tbl_trace_ability` VALUES (13, 9, 9, '2025-09-11T07:12:00.000Z', '1', '1', 'LOSA1', '16', '1', '1', '2025-09-10', '2025-09-10 07:12:40', '2025-09-10 07:12:40');
+INSERT INTO `tbl_trace_ability` VALUES (14, 9, 9, '2025-09-19T07:12:00.000Z', '1', '110', 'LOSA1', '16', '10', '1', '2025-09-18', '2025-09-10 07:12:40', '2025-09-10 07:12:40');
+INSERT INTO `tbl_trace_ability` VALUES (15, 9, 10, '2025-09-26T07:12:00.000Z', '1', '0', 'LOSA12', '22', '1', '1', '2025-09-25', '2025-09-10 07:12:40', '2025-09-10 07:12:40');
+INSERT INTO `tbl_trace_ability` VALUES (16, 9, 10, '2025-09-30T07:12:00.000Z', '1', '1', 'LSO', '22', '11', '1', '2025-09-29', '2025-09-10 07:12:40', '2025-09-10 07:12:40');
+INSERT INTO `tbl_trace_ability` VALUES (17, 11, 11, '2025-09-16T19:06:00.000Z', '10', '12', 'PSO', '25', '10', '1', '2025-09-15', '2025-09-10 19:07:11', '2025-09-10 19:07:11');
+INSERT INTO `tbl_trace_ability` VALUES (19, 12, 13, '2025-09-09T01:42:00.000Z', '900', '1990', 'AAA01', '100', '100', '0', '2025-09-08', '2025-09-11 07:25:21', '2025-09-11 07:25:21');
+INSERT INTO `tbl_trace_ability` VALUES (20, 12, 14, '2025-09-23', '100', '2140', 'AAA04', '100', '100', '0', '2025-09-22', '2025-09-11 07:25:21', '2025-09-11 07:25:21');
+INSERT INTO `tbl_trace_ability` VALUES (24, 14, 21, '2025-10-14', '10', '2', 'MLA01', '30', '12', '18', '2025-10-13', '2025-10-07 05:44:24', '2025-10-07 05:44:24');
+INSERT INTO `tbl_trace_ability` VALUES (25, 13, 15, '2025-09-07', '4350', '3300', 'CL01', '25', '25', '0', '2025-09-06', '2025-10-07 06:45:04', '2025-10-07 06:45:04');
+INSERT INTO `tbl_trace_ability` VALUES (26, 13, 16, '2025-09-01', '1000', '750', 'CL03', '30', '30', '0', '2025-08-31', '2025-10-07 06:45:04', '2025-10-07 06:45:04');
+INSERT INTO `tbl_trace_ability` VALUES (27, 13, 15, '2025-09-07', '4350', '3300', 'CL03', '25', '25', '0', '2025-09-06', '2025-10-07 06:45:04', '2025-10-07 06:45:04');
+INSERT INTO `tbl_trace_ability` VALUES (30, 16, 26, '2025-10-21', '10', '11', '3L05', '30', '30', '0', '2025-10-20', '2025-10-09 03:13:56', '2025-10-09 03:13:56');
+INSERT INTO `tbl_trace_ability` VALUES (31, 16, 48, '2025-10-07', '1', '1', '3MLS', '24', '24', '0', '2025-10-06', '2025-10-09 03:13:56', '2025-10-09 03:13:56');
+INSERT INTO `tbl_trace_ability` VALUES (32, 16, 49, '2025-10-30', '1', '0', 'LMA', '15', '15', '0', '2025-10-29', '2025-10-09 03:13:56', '2025-10-09 03:13:56');
 
 SET FOREIGN_KEY_CHECKS = 1;
