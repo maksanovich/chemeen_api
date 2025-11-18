@@ -1,10 +1,10 @@
 import { Request, Response } from 'express';
 import { QueryTypes } from 'sequelize';
+import * as pdf from 'html-pdf';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as Handlebars from 'handlebars';
 import { format } from "date-fns";
-import puppeteer from 'puppeteer';
 
 import sequelize from '../../config/sequelize';
 import { amount2word } from '../../common/utils';
@@ -352,7 +352,7 @@ export const exportAllPDFs = async (req: Request, res: Response): Promise<void> 
     }
 }
 
-const generatePDF = async (templatePath: string, data: any): Promise<{ success: boolean; data?: Buffer }> => {
+const generatePDF = (templatePath: string, data: any): Promise<{ success: boolean; data?: Buffer }> => {
     const htmlTemplate = fs.readFileSync(templatePath, 'utf8');
 
     Handlebars.registerHelper('times', function (n: number, block: any) {
@@ -368,35 +368,18 @@ const generatePDF = async (templatePath: string, data: any): Promise<{ success: 
     });
 
     const template = Handlebars.compile(htmlTemplate);
+
     const html = template(data);
 
-    try {
-        const browser = await puppeteer.launch({
-            headless: true,
-            args: ['--no-sandbox', '--disable-setuid-sandbox']
-        });
-        
-        const page = await browser.newPage();
-        await page.setContent(html, { waitUntil: 'networkidle0' });
-        
-        const pdfBuffer = await page.pdf({
-            format: 'A4',
-            printBackground: true,
-            margin: {
-                top: '10mm',
-                right: '10mm',
-                bottom: '10mm',
-                left: '10mm'
+    return new Promise((resolve, reject) => {
+        pdf.create(html).toBuffer((err: any, buffer: Buffer) => {
+            if (err) {
+                console.error('PDF generation error:', err);
+                return resolve({ success: false });
             }
+            resolve({ success: true, data: buffer });
         });
-        
-        await browser.close();
-        
-        return { success: true, data: pdfBuffer };
-    } catch (err: any) {
-        console.error('PDF generation error:', err);
-        return { success: false };
-    }
+    });
 };
 
 const generatePIPDF = async (id: string): Promise<{ success: boolean; data?: Buffer }> => {
