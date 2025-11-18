@@ -5,7 +5,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as Handlebars from 'handlebars';
 import { format } from "date-fns";
-import * as phantomjs from 'phantomjs-prebuilt';
+const phantomjs = require('phantomjs-prebuilt');
 
 import sequelize from '../../config/sequelize';
 import { amount2word } from '../../common/utils';
