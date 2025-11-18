@@ -373,11 +373,23 @@ const generatePDF = (templatePath: string, data: any): Promise<{ success: boolea
     const html = template(data);
 
     return new Promise((resolve, reject) => {
+        // Get PhantomJS binary path
+        let phantomPath: string;
+        try {
+            phantomPath = phantomjs.path;
+        } catch (e) {
+            // Fallback: construct path manually
+            const phantomjsModulePath = require.resolve('phantomjs-prebuilt');
+            const phantomjsDir = path.dirname(phantomjsModulePath);
+            phantomPath = path.join(phantomjsDir, 'bin', 'phantomjs');
+        }
+        
         pdf.create(html, {
-            phantomPath: phantomjs.path
+            phantomPath: phantomPath
         }).toBuffer((err: any, buffer: Buffer) => {
             if (err) {
                 console.error('PDF generation error:', err);
+                console.error('PhantomJS path used:', phantomPath);
                 return resolve({ success: false });
             }
             resolve({ success: true, data: buffer });
