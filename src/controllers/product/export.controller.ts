@@ -1,9 +1,10 @@
 import { Request, Response } from 'express';
 import { QueryTypes } from 'sequelize';
-import * as pdf from 'html-pdf';
+// import * as pdf from 'html-pdf';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as Handlebars from 'handlebars';
+import puppeteer from 'puppeteer';
 import { format } from "date-fns";
 
 import sequelize from '../../config/sequelize';
@@ -357,34 +358,90 @@ export const exportAllPDFs = async (req: Request, res: Response): Promise<void> 
     }
 }
 
-const generatePDF = (templatePath: string, data: any): Promise<{ success: boolean; data?: Buffer }> => {
+// const generatePDF = (templatePath: string, data: any): Promise<{ success: boolean; data?: Buffer }> => {
+//     const htmlTemplate = fs.readFileSync(templatePath, 'utf8');
+
+//     Handlebars.registerHelper('times', function (n: number, block: any) {
+//         let accum = '';
+//         for (let i = 0; i < n; ++i) {
+//             accum += block.fn(i);
+//         }
+//         return accum;
+//     });
+
+//     Handlebars.registerHelper('subtract', function (a: number, b: number) {
+//         return a - b;
+//     });
+
+//     const template = Handlebars.compile(htmlTemplate);
+
+//     const html = template(data);
+
+//     return new Promise((resolve, reject) => {
+//         pdf.create(html).toBuffer((err: any, buffer: Buffer) => {
+//             if (err) {
+//                 console.error('PDF generation error:', err);
+//                 return resolve({ success: false });
+//             }
+//             resolve({ success: true, data: buffer });
+//         });
+//     });
+// };
+
+export const generatePDF = async (
+  templatePath: string,
+  data: any
+): Promise<{ success: boolean; data?: Buffer }> => {
+  try {
+    // Load HTML template
     const htmlTemplate = fs.readFileSync(templatePath, 'utf8');
 
+    // Helpers (same as your old code)
     Handlebars.registerHelper('times', function (n: number, block: any) {
-        let accum = '';
-        for (let i = 0; i < n; ++i) {
-            accum += block.fn(i);
-        }
-        return accum;
+      let accum = '';
+      for (let i = 0; i < n; ++i) {
+        accum += block.fn(i);
+      }
+      return accum;
     });
 
     Handlebars.registerHelper('subtract', function (a: number, b: number) {
-        return a - b;
+      return a - b;
     });
 
+    // Compile template
     const template = Handlebars.compile(htmlTemplate);
-
     const html = template(data);
 
-    return new Promise((resolve, reject) => {
-        pdf.create(html).toBuffer((err: any, buffer: Buffer) => {
-            if (err) {
-                console.error('PDF generation error:', err);
-                return resolve({ success: false });
-            }
-            resolve({ success: true, data: buffer });
-        });
+    // Launch Chrome/Chromium
+    const browser = await puppeteer.launch({
+      headless: true,
+      args: ["--no-sandbox", "--disable-setuid-sandbox"] // required on Ubuntu VPS
     });
+
+    const page = await browser.newPage();
+
+    // Set HTML
+    await page.setContent(html, {
+      waitUntil: "networkidle0",
+    });
+
+    // Generate PDF as Buffer (no file written)
+    const pdfUint8 = await page.pdf({
+      format: "A4",
+      printBackground: true,
+    });
+
+    const pdfBuffer = Buffer.from(pdfUint8);
+
+    await browser.close();
+
+    return { success: true, data: pdfBuffer };
+
+  } catch (err) {
+    console.error("PDF generation error:", err);
+    return { success: false };
+  }
 };
 
 const generatePIPDF = async (id: string): Promise<{ success: boolean; data?: Buffer }> => {
