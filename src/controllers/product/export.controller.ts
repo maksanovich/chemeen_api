@@ -230,7 +230,7 @@ const groupCodeListByProduct = (codeListData: any[], piData: any): ProductOutput
             scaleTotals,
             grandTotal,
             grandTotalScale,
-            sampleScale: `${grandTotal} + 1/2 = 20MCS`,
+            sampleScale: `√${grandTotal} + 1/2 = 20MCS`,
             createdAt
         };
     });
