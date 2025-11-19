@@ -18,7 +18,12 @@ export const exportPIPDF = async (req: Request, res: Response): Promise<void> =>
         let itemData: any = await getItem(id);
         itemData = await Promise.all(itemData.map(async (item: any) => {
             const itemDetailData = await getItemDetail(item.ItemId);
-            item.details = itemDetailData;
+            // Hide size rows that don't have carton values
+            const filteredDetails = itemDetailData.filter((detail: any) => {
+                const cartons = parseFloat(detail.cartons);
+                return !isNaN(cartons) && cartons > 0;
+            });
+            item.details = filteredDetails;
             return item;
         }));
 
