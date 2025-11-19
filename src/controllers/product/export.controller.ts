@@ -1,6 +1,5 @@
 import { Request, Response } from 'express';
 import { QueryTypes } from 'sequelize';
-// import * as pdf from 'html-pdf';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as Handlebars from 'handlebars';
